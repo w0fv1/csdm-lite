@@ -333,41 +333,39 @@ msgid "An error occurred while loading the application."
 msgstr "Ocorreu um erro ao carregar a aplicação."
 
 #: src/ui/bootstrap/connect-database/connect-database-button.tsx
+#: src/ui/components/buttons/retry-button.tsx
 msgctxt "Button"
-msgid "Connect"
-msgstr "Connectar"
+msgid "Retry"
+msgstr "Tentar novamente"
 
 #: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "It looks like you installed an older version of CS Demo Manager and the current database schema is not compatible with it."
-msgstr "Parece que você instalou uma versão mais antiga do CS Demo Manager e o esquema atual do banco de dados não é compatível com ele."
-
-#: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "You can either update CS Demo Manager to the latest version or reset the database to start from scratch."
-msgstr "Você pode atualizar o CS Demo Manager para a última versão ou redefinir o banco de dados para começar do zero."
-
-#: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "It usually means that PostgreSQL is not installed on your system or the path to the <0>psql</0> executable is not in your <1>PATH</1> environment variable."
-msgstr "Geralmente significa que o PostgreSQL não está instalado no seu sistema ou o caminho para o executável <0>psql</0> não está na variável de ambiente <1>PATH</1>."
-
-#: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "It usually means that the PostgreSQL service is not running, make sure it's running."
-msgstr "Geralmente isso significa que o serviço PostgreSQL não está rodando, certifique-se de que está em execução."
-
-#: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "This error usually means that the database is not running or that the connection settings are incorrect."
-msgstr "Este erro geralmente significa que o banco de dados não está sendo executado ou que as configurações de conexão estão incorretas."
-
-#: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "Make sure PostgreSQL is running and your settings are correct."
-msgstr "Certifique-se de que o PostgreSQL está sendo executado e suas configurações estão corretas."
-
-#: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "The connection to the database failed with the following error:"
+msgid "It looks like you installed an older version of CS Demo Manager Lite and the current database schema is not compatible with it."
 msgstr ""
 
 #: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "CS Demo Manager requires a PostgreSQL database."
-msgstr "O Gerenciador de Demo CS requer um banco de dados PostgreSQL."
+msgid "You can either update CS Demo Manager Lite to the latest version or reset the database to start from scratch."
+msgstr ""
+
+#: src/ui/bootstrap/connect-database/connect-database.tsx
+msgid "This error usually means that the local database could not be opened yet."
+msgstr ""
+
+#: src/ui/bootstrap/connect-database/connect-database.tsx
+msgid "Make sure the SQLite database file is accessible and your settings are correct."
+msgstr ""
+
+#: src/ui/bootstrap/connect-database/connect-database.tsx
+msgid "Opening the local database failed with the following error:"
+msgstr ""
+
+#: src/ui/bootstrap/connect-database/connect-database.tsx
+msgid "CS Demo Manager Lite opens its local SQLite database automatically."
+msgstr ""
+
+#: src/ui/bootstrap/connect-database/connect-database.tsx
+#: src/ui/settings/database/database.tsx
+msgid "Database file"
+msgstr ""
 
 #: src/ui/bootstrap/connect-database/connect-database.tsx
 msgid "{secondsBeforeNextTry, plural, one {Retrying in # second…} other {Retrying in # seconds…}}"
@@ -414,7 +412,11 @@ msgid "Changelog version {APP_VERSION}"
 msgstr ""
 
 #: src/ui/changelog/changelog-dialog.tsx
-msgid "Visit website"
+msgid "View release notes"
+msgstr ""
+
+#: src/ui/changelog/changelog-dialog.tsx
+msgid "View releases"
 msgstr ""
 
 #: src/ui/components/buttons/analyze-button.tsx
@@ -509,11 +511,6 @@ msgstr "Excluir"
 msgctxt "Button"
 msgid "Reset"
 msgstr "Redefinir"
-
-#: src/ui/components/buttons/retry-button.tsx
-msgctxt "Button"
-msgid "Retry"
-msgstr "Tentar novamente"
 
 #: src/ui/components/buttons/reveal-button.tsx
 msgctxt "Button"
@@ -1148,19 +1145,19 @@ msgid "Enemy"
 msgstr "Inimigo"
 
 #: src/ui/components/donate.tsx
-msgid "Donate"
-msgstr "Faça uma doação"
-
-#: src/ui/components/donate.tsx
-msgid "CS Demo Manager is a project that I started during college in 2014 and maintained as much as I can since then."
+msgid "Support"
 msgstr ""
 
 #: src/ui/components/donate.tsx
-msgid "It's not backed by any corporate entity and is a free and open-source software that I hope you enjoy using."
+msgid "CS Demo Manager Lite is a community-maintained SQLite fork of the original CS Demo Manager project."
 msgstr ""
 
 #: src/ui/components/donate.tsx
-msgid "Your <0>donation</0> is greatly appreciated and motivates me to continue working on CS Demo Manager. Thank you!"
+msgid "The original project was created and maintained upstream, and this fork focuses on keeping a lightweight local SQLite workflow available."
+msgstr ""
+
+#: src/ui/components/donate.tsx
+msgid "The best way to support this fork right now is to file issues, test releases, and contribute improvements on <0>GitHub</0>."
 msgstr ""
 
 #: src/ui/components/dropdown-filter/analysis-status-select.tsx

@@ -6,6 +6,7 @@ import { ArgumentName } from 'csdm/common/argument/argument-name';
 import type { Argument } from 'csdm/common/types/argument';
 import { getArgumentValueFromArray } from 'csdm/electron-main/get-argument-value-from-array';
 import { listenForContextMenu } from 'csdm/electron-main/listen-for-context-menu';
+import { getAppResourcePath } from 'csdm/electron-main/get-app-resource-path';
 
 class WindowManager {
   private mainWindow: BrowserWindow | null = null;
@@ -74,7 +75,7 @@ class WindowManager {
       height: windowState.height,
       webPreferences: {
         nodeIntegration: true,
-        preload: path.join(app.getAppPath(), 'dev-preload.js'),
+        preload: getAppResourcePath('dev-preload.js'),
         contextIsolation: false,
       },
       backgroundColor: '#080808',
@@ -87,7 +88,7 @@ class WindowManager {
     });
 
     devWindow.webContents.openDevTools();
-    await devWindow.loadFile('dev.html');
+    await devWindow.loadFile(getAppResourcePath('dev.html'));
 
     return devWindow;
   }
@@ -106,7 +107,7 @@ class WindowManager {
       minWidth: 500,
       minHeight: 400,
       webPreferences: {
-        preload: path.join(app.getAppPath(), 'preload.js'),
+        preload: getAppResourcePath('preload.js'),
         sandbox: false,
         // Disable webSecurity in dev mode only to allow local files access
         webSecurity: IS_PRODUCTION,
@@ -154,6 +155,21 @@ class WindowManager {
       event.preventDefault();
     });
 
+    mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL, isMainFrame) => {
+      logger.error('Renderer did-fail-load');
+      logger.error({ errorCode, errorDescription, validatedURL, isMainFrame });
+    });
+
+    mainWindow.webContents.on('render-process-gone', (event, details) => {
+      logger.error('Renderer process gone');
+      logger.error(details);
+    });
+
+    mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
+      logger.log('Renderer console message');
+      logger.log({ level, message, line, sourceId });
+    });
+
     if (IS_DEV) {
       mainWindow.webContents.on('devtools-opened', () => {
         setImmediate(() => {
@@ -166,7 +182,7 @@ class WindowManager {
     if (IS_DEV) {
       await mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
     } else {
-      await mainWindow.loadFile('index.html');
+      await mainWindow.loadFile(getAppResourcePath('index.html'));
     }
 
     listenForContextMenu(mainWindow);
@@ -176,7 +192,6 @@ class WindowManager {
 
   private isAllowedUrl(url: string) {
     const allowedWebsites = [
-      'https://cs-demo-manager.com/',
       'https://github.com/',
       'https://steamcommunity.com/',
       'https://ffmpeg.org/',

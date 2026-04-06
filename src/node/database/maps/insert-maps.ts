@@ -1,8 +1,7 @@
-import { DatabaseError } from 'pg';
 import { db } from 'csdm/node/database/database';
-import { PostgresqlErrorCode } from '../postgresql-error-code';
 import { MapAlreadyExists } from './errors/map-already-exists';
 import type { InsertableMap } from './map-table';
+import { isSqliteUniqueConstraintError } from '../is-sqlite-error';
 
 export async function insertMaps(maps: InsertableMap[]) {
   try {
@@ -10,11 +9,8 @@ export async function insertMaps(maps: InsertableMap[]) {
 
     return insertedMaps;
   } catch (error) {
-    if (error instanceof DatabaseError) {
-      switch (error.code) {
-        case PostgresqlErrorCode.UniqueViolation:
-          throw new MapAlreadyExists();
-      }
+    if (isSqliteUniqueConstraintError(error)) {
+      throw new MapAlreadyExists();
     }
 
     throw error;

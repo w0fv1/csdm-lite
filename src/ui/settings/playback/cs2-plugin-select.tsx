@@ -8,6 +8,7 @@ import { ExclamationTriangleIcon } from 'csdm/ui/icons/exclamation-triangle-icon
 import { useFormatDate } from 'csdm/ui/hooks/use-format-date';
 import { ExternalLink } from 'csdm/ui/components/external-link';
 import { usePlaybackSettings } from './use-playback-settings';
+import { getApplicationGuideUrl } from 'csdm/common/urls';
 
 export function Cs2PluginSelect() {
   const { cs2PluginVersion } = usePlaybackSettings();
@@ -128,9 +129,7 @@ export function Cs2PluginSelect() {
             <p>
               <Trans>
                 See the{' '}
-                <ExternalLink href="https://cs-demo-manager.com/docs/guides/playback#cs2-plugin-compatibility">
-                  documentation
-                </ExternalLink>{' '}
+                <ExternalLink href={getApplicationGuideUrl('cs2-plugin-compatibility')}>documentation</ExternalLink>{' '}
                 for more information.
               </Trans>
             </p>

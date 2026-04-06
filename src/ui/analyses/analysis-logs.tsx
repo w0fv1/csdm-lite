@@ -10,6 +10,7 @@ import { ExternalLink } from 'csdm/ui/components/external-link';
 import { ExclamationTriangleIcon } from 'csdm/ui/icons/exclamation-triangle-icon';
 import { isErrorCode } from 'csdm/common/is-error-code';
 import { ErrorCode } from 'csdm/common/error-code';
+import { BUG_REPORT_URL, getApplicationGuideUrl } from 'csdm/common/urls';
 
 function useGenerateLogs() {
   const { t } = useLingui();
@@ -115,16 +116,14 @@ export function AnalysisLogs() {
           <p>
             <Trans>
               Please read the error codes{' '}
-              <ExternalLink href="https://cs-demo-manager.com/docs/guides/demos-analysis#analysis-errors">
-                documentation
-              </ExternalLink>{' '}
+              <ExternalLink href={getApplicationGuideUrl('analysis-errors')}>documentation</ExternalLink>{' '}
               to understand the code signification and what you can do.
             </Trans>
           </p>
           <p>
             <Trans>
               Please read and follow the instructions on{' '}
-              <ExternalLink href="https://github.com/akiver/cs-demo-manager/issues/new?assignees=&labels=&projects=&template=bug_report.yml">
+              <ExternalLink href={BUG_REPORT_URL}>
                 GitHub
               </ExternalLink>{' '}
               to report the issue <strong>only if the documentation says you should for this error code</strong>.
@@ -137,9 +136,7 @@ export function AnalysisLogs() {
         <p>
           <Trans>
             Please read and follow the instructions on{' '}
-            <ExternalLink href="https://github.com/akiver/cs-demo-manager/issues/new?assignees=&labels=&projects=&template=bug_report.yml">
-              GitHub
-            </ExternalLink>{' '}
+            <ExternalLink href={BUG_REPORT_URL}>GitHub</ExternalLink>{' '}
             to report the issue.
           </Trans>
         </p>

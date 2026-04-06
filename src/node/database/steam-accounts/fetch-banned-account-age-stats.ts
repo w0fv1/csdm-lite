@@ -1,15 +1,10 @@
-import { sql } from 'kysely';
 import { db } from 'csdm/node/database/database';
+import { ensureDate } from '../ensure-date';
 
 export async function fetchBannedAccountAgeStats(ignoreBanBeforeFirstSeen: boolean) {
   let query = db
     .selectFrom('steam_accounts')
-    .select([
-      sql<Date | null>`CURRENT_DATE - AVG(AGE(NOW(), creation_date))`.as('average'),
-      sql<Date | null>`CURRENT_DATE - percentile_cont(0.5) WITHIN GROUP (ORDER BY AGE(NOW(), creation_date))`.as(
-        'median',
-      ),
-    ])
+    .select(['steam_accounts.creation_date as creationDate'])
     .where('steam_accounts.last_ban_date', 'is not', null)
     .where('steam_accounts.creation_date', 'is not', null)
     .leftJoin('players', 'players.steam_id', 'steam_accounts.steam_id')
@@ -20,10 +15,27 @@ export async function fetchBannedAccountAgeStats(ignoreBanBeforeFirstSeen: boole
     query = query.whereRef('steam_accounts.last_ban_date', '>=', ref('demos.date'));
   }
 
-  const result = await query.executeTakeFirst();
+  const rows = await query.execute();
+  const timestamps = rows
+    .map((row) => ensureDate(row.creationDate).getTime())
+    .sort((left, right) => left - right);
+
+  if (timestamps.length === 0) {
+    return {
+      average: null,
+      median: null,
+    };
+  }
+
+  const averageTimestamp = timestamps.reduce((sum, timestamp) => sum + timestamp, 0) / timestamps.length;
+  const middleIndex = Math.floor(timestamps.length / 2);
+  const medianTimestamp =
+    timestamps.length % 2 === 0
+      ? (timestamps[middleIndex - 1] + timestamps[middleIndex]) / 2
+      : timestamps[middleIndex];
 
   return {
-    average: result?.average?.toISOString() ?? null,
-    median: result?.median?.toISOString() ?? null,
+    average: new Date(averageTimestamp).toISOString(),
+    median: new Date(medianTimestamp).toISOString(),
   };
 }

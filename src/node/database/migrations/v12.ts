@@ -1,17 +1,23 @@
 import { sql } from 'kysely';
 import type { Migration } from './migration';
+import { tableHasColumn } from './introspection';
 
 const v12: Migration = {
   schemaVersion: 12,
   run: async (transaction) => {
+    const hasLegacyDateColumn = await tableHasColumn(transaction, 'matches', 'date');
+    if (!hasLegacyDateColumn) {
+      return;
+    }
+
     // This migration removes redundant columns from the matches table that are already present in the demos table.
     // The demos table is now the single source of truth for both demos and matches.
 
     // The "player_ban_per_match" view (created in the v1 migration) depends on the "date" column in the matches table.
     // Since we are going to remove that column, we must first recreate the view to use the "date" column from the demos table instead.
+    await sql`DROP VIEW IF EXISTS player_ban_per_match`.execute(transaction);
     await transaction.schema
       .createView('player_ban_per_match')
-      .orReplace()
       .as(
         transaction
           .with('match_steam_ids_with_date', (qb) => {

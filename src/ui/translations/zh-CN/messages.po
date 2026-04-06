@@ -333,41 +333,39 @@ msgid "An error occurred while loading the application."
 msgstr "加载应用程序时发生错误。"
 
 #: src/ui/bootstrap/connect-database/connect-database-button.tsx
+#: src/ui/components/buttons/retry-button.tsx
 msgctxt "Button"
-msgid "Connect"
-msgstr "连接"
+msgid "Retry"
+msgstr "重试"
 
 #: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "It looks like you installed an older version of CS Demo Manager and the current database schema is not compatible with it."
-msgstr "看起来你安装了旧版本的 CS Demo Manager，而当前数据库架构与它不兼容。"
+msgid "It looks like you installed an older version of CS Demo Manager Lite and the current database schema is not compatible with it."
+msgstr ""
 
 #: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "You can either update CS Demo Manager to the latest version or reset the database to start from scratch."
-msgstr "你可以选择更新 CS Demo Manager 到最新版本，或者重置数据库从零开始。"
+msgid "You can either update CS Demo Manager Lite to the latest version or reset the database to start from scratch."
+msgstr ""
 
 #: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "It usually means that PostgreSQL is not installed on your system or the path to the <0>psql</0> executable is not in your <1>PATH</1> environment variable."
-msgstr "这通常意味着您的系统上未安装 PostgreSQL，或者 <0>psql</0> 可执行文件的路径不在 <1>PATH</1> 环境变量中。"
+msgid "This error usually means that the local database could not be opened yet."
+msgstr ""
 
 #: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "It usually means that the PostgreSQL service is not running, make sure it's running."
-msgstr "这通常意味着 PostgreSQL 服务未运行，请确保其正常运行。"
+msgid "Make sure the SQLite database file is accessible and your settings are correct."
+msgstr ""
 
 #: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "This error usually means that the database is not running or that the connection settings are incorrect."
-msgstr "这个错误通常意味着数据库未运行或者连接设置不正确"
+msgid "Opening the local database failed with the following error:"
+msgstr ""
 
 #: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "Make sure PostgreSQL is running and your settings are correct."
-msgstr "请确认 PostgreSQL 正在运行并且您的设置是正确的。"
+msgid "CS Demo Manager Lite opens its local SQLite database automatically."
+msgstr ""
 
 #: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "The connection to the database failed with the following error:"
-msgstr "与数据库的连接失败，错误如下："
-
-#: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "CS Demo Manager requires a PostgreSQL database."
-msgstr "CS Demo Manager 需要你的电脑上安装 PostgreSQL 数据库。"
+#: src/ui/settings/database/database.tsx
+msgid "Database file"
+msgstr ""
 
 #: src/ui/bootstrap/connect-database/connect-database.tsx
 msgid "{secondsBeforeNextTry, plural, one {Retrying in # second…} other {Retrying in # seconds…}}"
@@ -414,8 +412,12 @@ msgid "Changelog version {APP_VERSION}"
 msgstr "更新日志 {APP_VERSION}"
 
 #: src/ui/changelog/changelog-dialog.tsx
-msgid "Visit website"
-msgstr "访问我们的网站"
+msgid "View release notes"
+msgstr ""
+
+#: src/ui/changelog/changelog-dialog.tsx
+msgid "View releases"
+msgstr ""
 
 #: src/ui/components/buttons/analyze-button.tsx
 msgctxt "Button"
@@ -509,11 +511,6 @@ msgstr "移除"
 msgctxt "Button"
 msgid "Reset"
 msgstr "重置"
-
-#: src/ui/components/buttons/retry-button.tsx
-msgctxt "Button"
-msgid "Retry"
-msgstr "重试"
 
 #: src/ui/components/buttons/reveal-button.tsx
 msgctxt "Button"
@@ -1148,20 +1145,20 @@ msgid "Enemy"
 msgstr "敌人"
 
 #: src/ui/components/donate.tsx
-msgid "Donate"
-msgstr "捐助"
+msgid "Support"
+msgstr ""
 
 #: src/ui/components/donate.tsx
-msgid "CS Demo Manager is a project that I started during college in 2014 and maintained as much as I can since then."
-msgstr "CS Demo Manager 是我在 2014 年大学期间启动的一个项目，从那时起我一直在尽力维护它。"
+msgid "CS Demo Manager Lite is a community-maintained SQLite fork of the original CS Demo Manager project."
+msgstr ""
 
 #: src/ui/components/donate.tsx
-msgid "It's not backed by any corporate entity and is a free and open-source software that I hope you enjoy using."
-msgstr "它没有任何公司实体的支持，是一个自由和开放源码软件，我希望你们能够享受它。"
+msgid "The original project was created and maintained upstream, and this fork focuses on keeping a lightweight local SQLite workflow available."
+msgstr ""
 
 #: src/ui/components/donate.tsx
-msgid "Your <0>donation</0> is greatly appreciated and motivates me to continue working on CS Demo Manager. Thank you!"
-msgstr "非常感谢您的 <0> 捐赠 </0> ，这将鼓励我继续改进 CS Demo Manager。谢谢！"
+msgid "The best way to support this fork right now is to file issues, test releases, and contribute improvements on <0>GitHub</0>."
+msgstr ""
 
 #: src/ui/components/dropdown-filter/analysis-status-select.tsx
 msgctxt "Option label for demo analysis status"

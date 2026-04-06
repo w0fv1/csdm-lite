@@ -54,8 +54,9 @@ async function buildWebSocketServerBundle() {
     target: `node${node}`,
     mainFields: ['module', 'main'],
     external: [
-      'pg-native',
       '@aws-sdk/client-s3', // the unzipper module has it as a dev dependency
+      'better-sqlite3',
+      'better-sqlite3/build/Release/better_sqlite3.node',
     ],
     define: {
       ...commonDefine,
@@ -127,7 +128,7 @@ async function buildCliBundle() {
       'process.env.STEAM_API_KEYS': `"${process.env.STEAM_API_KEYS}"`,
       'process.env.FACEIT_API_KEY': `"${process.env.FACEIT_API_KEY}"`,
     },
-    external: ['pg-native', '@aws-sdk/client-s3'],
+    external: ['@aws-sdk/client-s3', 'better-sqlite3', 'better-sqlite3/build/Release/better_sqlite3.node'],
     alias: {
       // Force fdir to use the CJS version to avoid createRequire(import.meta.url) not working
       fdir: './node_modules/fdir/dist/index.cjs',

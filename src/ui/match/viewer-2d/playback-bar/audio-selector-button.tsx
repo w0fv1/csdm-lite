@@ -21,6 +21,7 @@ import { SpinnableButton } from 'csdm/ui/components/buttons/spinnable-button';
 import { SoundCross } from 'csdm/ui/icons/sound-cross';
 import { useViewerContext } from '../use-viewer-context';
 import { supportedAudioExtensions } from 'csdm/common/types/audio-extensions';
+import { getApplicationGuideUrl } from 'csdm/common/urls';
 
 type Props = {
   loadAudioFile: (audioFilePath: string) => Promise<void>;
@@ -157,9 +158,7 @@ function AudioSelectorDialog({ loadAudioFile }: Props) {
               <p className="mt-8">
                 <Trans>
                   See the{' '}
-                  <ExternalLink href="https://cs-demo-manager.com/docs/guides/2d-viewer#audio-playback">
-                    documentation
-                  </ExternalLink>{' '}
+                  <ExternalLink href={getApplicationGuideUrl('audio-playback')}>documentation</ExternalLink>{' '}
                   for more information.
                 </Trans>
               </p>

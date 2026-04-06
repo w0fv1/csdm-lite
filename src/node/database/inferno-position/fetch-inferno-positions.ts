@@ -7,12 +7,18 @@ export async function fetchInfernoPositions(checksum: string, roundNumber: numbe
   const rows = await db
     .selectFrom('inferno_positions')
     .selectAll()
-    .distinctOn(['tick', 'unique_id'])
     .where('match_checksum', '=', checksum)
     .where('round_number', '=', roundNumber)
     .orderBy('tick')
     .execute();
-  const infernoPositions: InfernoPosition[] = fillMissingTicks(rows.map(infernoPositionRowToInfernoPosition));
+  const uniqueRows = rows.filter((row, index, allRows) => {
+    return (
+      allRows.findIndex((candidate) => {
+        return candidate.tick === row.tick && candidate.unique_id === row.unique_id;
+      }) === index
+    );
+  });
+  const infernoPositions: InfernoPosition[] = fillMissingTicks(uniqueRows.map(infernoPositionRowToInfernoPosition));
 
   return infernoPositions;
 }

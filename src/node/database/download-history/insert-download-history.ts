@@ -7,7 +7,7 @@ export async function insertDownloadHistory(matchId: string) {
     .values({ match_id: matchId })
     .onConflict((oc) => {
       return oc.column('match_id').doUpdateSet({
-        downloaded_at: () => sql`now()`,
+        downloaded_at: () => sql`CURRENT_TIMESTAMP`,
       });
     })
     .execute();

@@ -1,42 +1,139 @@
-import { types, Pool } from 'pg';
+import type BetterSqlite3 from 'better-sqlite3';
 import type { KyselyConfig, LogEvent, Logger } from 'kysely';
-import { Kysely, PostgresDialect } from 'kysely';
+import { Kysely, SqliteDialect } from 'kysely';
 import type { DatabaseSettings } from 'csdm/node/settings/settings';
 import type { Database } from './schema';
+import { normalizeSqliteValue } from './normalize-sqlite-value';
 
 export let db: Kysely<Database>;
+let sqliteDatabase: BetterSqlite3.Database | undefined;
 
-// Convert int8 values that are "safe" JS integers into Numbers otherwise leave them as strings.
-// Postgres returns int8 values for int8 columns but also aggregate functions (COUNT(), SUM()...).
-// By default node-pg parses int8 values into strings.
-// We do this conversion for the following reasons:
-// - The only int8 columns in the app are used for tables PK ID and we don't do Math operations on them.
-// - To not have to think about casting values into numbers when using aggregate functions, i.e.:
-//   db.count('id') vs db.raw('COUNT(id)::INT')
-// - Sending BigInts through WebSocket result in strings.
-types.setTypeParser(types.builtins.INT8, (value) => {
-  const valueAsNumber = Number(value);
-  if (Number.isSafeInteger(valueAsNumber)) {
-    return valueAsNumber;
+function isDateColumnType(type: string | null | undefined) {
+  if (!type) {
+    return false;
+  }
+
+  const normalizedType = type.toLowerCase();
+  return normalizedType === 'date' || normalizedType === 'datetime' || normalizedType === 'timestamp' || normalizedType === 'timestamptz';
+}
+
+function normalizeSqliteResultValue(value: unknown, type: string | null | undefined) {
+  if (value === null || value === undefined || type === undefined || type === null) {
+    return value;
+  }
+
+  if (type.toLowerCase() === 'boolean') {
+    return value === 1 || value === true;
+  }
+
+  if (isDateColumnType(type) && !(value instanceof Date)) {
+    const date = new Date(String(value));
+    if (!Number.isNaN(date.getTime())) {
+      return date;
+    }
   }
 
   return value;
-});
-// Cast numeric types into JS Number so SUM, AVG... will be numbers instead of strings.
-types.setTypeParser(types.builtins.NUMERIC, Number);
-types.setTypeParser(types.builtins.INT4, Number);
-types.setTypeParser(types.builtins.INT2, Number);
+}
+
+class SqliteStatementWrapper {
+  private columnTypes = new Map<string, string | null | undefined>();
+
+  public constructor(private statement: BetterSqlite3.Statement) {
+    if (this.statement.reader) {
+      for (const column of this.statement.columns()) {
+        this.columnTypes.set(column.name, column.type);
+      }
+    }
+  }
+
+  public get reader() {
+    return this.statement.reader;
+  }
+
+  private normalizeRow<T>(row: T): T {
+    if (row === null || row === undefined || typeof row !== 'object' || Array.isArray(row)) {
+      return row;
+    }
+
+    let hasChanged = false;
+    const normalizedRow: Record<string, unknown> = {};
+    for (const [columnName, value] of Object.entries(row)) {
+      const normalizedValue = normalizeSqliteResultValue(value, this.columnTypes.get(columnName));
+      normalizedRow[columnName] = normalizedValue;
+      hasChanged = hasChanged || normalizedValue !== value;
+    }
+
+    return (hasChanged ? normalizedRow : row) as T;
+  }
+
+  public all(parameters: ReadonlyArray<unknown>) {
+    return this.statement.all(parameters.map(normalizeSqliteValue)).map((row) => this.normalizeRow(row));
+  }
+
+  public get(parameters: ReadonlyArray<unknown>) {
+    return this.normalizeRow(this.statement.get(parameters.map(normalizeSqliteValue)));
+  }
+
+  public run(parameters: ReadonlyArray<unknown>) {
+    return this.statement.run(parameters.map(normalizeSqliteValue));
+  }
+
+  public iterate(parameters: ReadonlyArray<unknown>) {
+    const iterator = this.statement.iterate(parameters.map(normalizeSqliteValue));
+    const normalizeRow = this.normalizeRow.bind(this);
+
+    return (function* () {
+      for (const row of iterator) {
+        yield normalizeRow(row);
+      }
+    })();
+  }
+}
+
+class SqliteDatabaseWrapper {
+  public constructor(private database: BetterSqlite3.Database) {}
+
+  public close() {
+    this.database.close();
+  }
+
+  public prepare(sql: string) {
+    return new SqliteStatementWrapper(this.database.prepare(sql));
+  }
+}
+
+export function getSqliteDatabase() {
+  if (sqliteDatabase === undefined) {
+    throw new Error('SQLite database has not been initialized yet');
+  }
+
+  return sqliteDatabase;
+}
 
 export function createDatabaseConnection(settings: DatabaseSettings) {
-  const dialect = new PostgresDialect({
-    pool: new Pool({
-      host: settings.hostname,
-      port: settings.port,
-      user: settings.username,
-      password: settings.password,
-      database: settings.database,
-      connectionTimeoutMillis: 10000,
-    }),
+  const BetterSqlite3 = require('better-sqlite3') as typeof import('better-sqlite3');
+  const logger = globalThis.logger ?? console;
+  try {
+    sqliteDatabase?.close();
+  } catch {
+    // The previous connection may already have been closed through Kysely's destroy().
+  }
+
+  const sqliteOptions =
+    process.env.CSDM_SQLITE_NATIVE_BINDING_PATH === undefined || process.env.CSDM_SQLITE_NATIVE_BINDING_PATH === ''
+      ? undefined
+      : {
+          nativeBinding: process.env.CSDM_SQLITE_NATIVE_BINDING_PATH,
+        };
+
+  sqliteDatabase = new BetterSqlite3(settings.filePath, sqliteOptions);
+  sqliteDatabase.pragma('foreign_keys = ON');
+  sqliteDatabase.pragma('journal_mode = WAL');
+  sqliteDatabase.pragma('busy_timeout = 10000');
+
+  const dialect = new SqliteDialect({
+    database: new SqliteDatabaseWrapper(sqliteDatabase),
   });
 
   let loggerFunction: Logger;

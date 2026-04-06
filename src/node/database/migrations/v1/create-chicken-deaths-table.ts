@@ -6,7 +6,7 @@ const createChickenDeathsTable: Migration = {
     await transaction.schema
       .createTable('chicken_deaths')
       .ifNotExists()
-      .addColumn('id', 'bigserial', (col) => col.primaryKey().notNull())
+      .addColumn('id', 'integer', (col) => col.primaryKey().notNull())
       .addColumn('match_checksum', 'varchar', (col) => col.notNull())
       .addForeignKeyConstraint('chicken_deaths_match_checksum_fk', ['match_checksum'], 'matches', ['checksum'], (cb) =>
         cb.onDelete('cascade'),

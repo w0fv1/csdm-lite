@@ -10,7 +10,7 @@ export async function resetDefaultMaps(game: Game) {
     .insertInto('maps')
     .values(defaultMaps)
     .onConflict((oc) => {
-      return oc.constraint('maps_name_game_unique').doUpdateSet({
+      return oc.columns(['name', 'game']).doUpdateSet({
         position_x: (b) => b.ref('excluded.position_x'),
         position_y: (b) => b.ref('excluded.position_y'),
         scale: (b) => b.ref('excluded.scale'),

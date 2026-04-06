@@ -131,11 +131,11 @@ export async function searchKills({
   }
 
   if (steamIds.length > 0) {
-    query = query.where('killer_steam_id', 'in', steamIds);
+    query = query.where('kills.killer_steam_id', 'in', steamIds);
   }
 
   if (victimSteamIds.length > 0) {
-    query = query.where('victim_steam_id', 'in', victimSteamIds);
+    query = query.where('kills.victim_steam_id', 'in', victimSteamIds);
   }
 
   if (mapNames.length > 0) {

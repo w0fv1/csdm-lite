@@ -26,6 +26,7 @@ import { VideoActionsMenu } from './video-actions-menu';
 import { ToggleTrueView } from './toggle-true-view';
 import { useCurrentMatch } from '../use-current-match';
 import { Game } from 'csdm/common/types/counter-strike';
+import { getApplicationGuideUrl } from 'csdm/common/urls';
 
 export function MatchVideo() {
   const match = useCurrentMatch();
@@ -42,7 +43,7 @@ export function MatchVideo() {
           <VideoActionsMenu />
           <SequencesSummary />
           <div className="ml-auto">
-            <DocumentationLink url="https://cs-demo-manager.com/docs/guides/video" />
+            <DocumentationLink url={getApplicationGuideUrl('video')} />
           </div>
         </div>
         <div className="mt-12 flex gap-x-12">

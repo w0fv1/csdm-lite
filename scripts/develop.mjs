@@ -10,6 +10,7 @@ import electronPath from 'electron';
 import esbuild from 'esbuild';
 import chokidar from 'chokidar';
 import nativeNodeModulesPlugin from './esbuild-native-node-modules-plugin.mjs';
+import { ensureElectronSqliteBinding } from './ensure-electron-sqlite-binding.mjs';
 import { node } from './electron-vendors.mjs';
 
 const rootFolderPath = fileURLToPath(new URL('..', import.meta.url));
@@ -36,11 +37,15 @@ const stderrIgnorePatterns = [
   /ExtensionLoadWarning/, // DevTools extension warnings
 ];
 
-function startElectron() {
+async function startElectron() {
   devLogger.info('Starting Electron...', { timestamp: true });
   // You can add app startup arguments in the following array for debugging, example: '--start-path=downloads'
   const args = [path.join(outFolderPath, 'main.js')];
-  electronProcess = spawn(String(electronPath), args);
+  const env = { ...process.env };
+  delete env.ELECTRON_RUN_AS_NODE;
+  delete env.CSDM_SQLITE_NATIVE_BINDING_PATH;
+  env.CSDM_SQLITE_NATIVE_BINDING_PATH = await ensureElectronSqliteBinding(rootFolderPath);
+  electronProcess = spawn(String(electronPath), args, { env });
   electronProcess.stdout.on('data', (data) => {
     mainProcessLogger.info(data.toString(), { timestamp: true });
   });
@@ -73,9 +78,9 @@ function killElectronProcess() {
   }
 }
 
-function restartElectron() {
+async function restartElectron() {
   killElectronProcess();
-  startElectron();
+  await startElectron();
 }
 
 async function buildAndWatchRendererProcessBundle() {
@@ -110,8 +115,9 @@ async function buildWebSocketProcessBundle() {
     target: `node${node}`,
     metafile: true,
     external: [
-      'pg-native',
       '@aws-sdk/client-s3', // the unzipper module has it as a dev dependency
+      'better-sqlite3',
+      'better-sqlite3/build/Release/better_sqlite3.node',
     ],
     define: {
       ...commonDefine,
@@ -230,7 +236,7 @@ async function buildAndWatchMainProcessBundles() {
       await buildMainProcessBundles();
     } catch (error) {
     } finally {
-      restartElectron();
+      await restartElectron();
     }
   });
 }
@@ -268,7 +274,7 @@ try {
   await assertWebSocketServerIsAvailable();
 
   await Promise.all([buildAndWatchRendererProcessBundle(), buildAndWatchMainProcessBundles(), copyDevRendererHtml()]);
-  startElectron();
+  await startElectron();
 } catch (error) {
   devLogger.error(error, { timestamp: true });
   process.exit(1);

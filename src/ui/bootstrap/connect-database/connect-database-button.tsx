@@ -10,7 +10,7 @@ type Props = {
 export function ConnectDatabaseButton({ isLoading, onClick }: Props) {
   return (
     <SpinnableButton onClick={onClick} isLoading={isLoading}>
-      <Trans context="Button">Connect</Trans>
+      <Trans context="Button">Retry</Trans>
     </SpinnableButton>
   );
 }

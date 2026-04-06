@@ -6,6 +6,6 @@ export async function insertDefaultMaps(transaction: Transaction<Database>) {
   await transaction
     .insertInto('maps')
     .values(getDefaultMaps())
-    .onConflict((oc) => oc.constraint('maps_name_game_unique').doNothing())
+    .onConflict((oc) => oc.columns(['name', 'game']).doNothing())
     .execute();
 }

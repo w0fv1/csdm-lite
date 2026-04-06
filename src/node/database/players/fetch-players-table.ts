@@ -37,7 +37,7 @@ async function fetchPlayersStats(filter: PlayersTableFilter): Promise<PlayersSta
       'players.steam_id as steamId',
       sum<number>('players.kill_count').as('killCount'),
       sum<number>('players.death_count').as('deathCount'),
-      sql<number>`SUM(players.kill_count)::NUMERIC / NULLIF(SUM(players.death_count), 0)::NUMERIC`.as('killDeathRatio'),
+      sql<number>`(SUM(players.kill_count) * 1.0) / NULLIF(SUM(players.death_count), 0)`.as('killDeathRatio'),
       sum<number>('players.assist_count').as('assistCount'),
       sum<number>('headshot_count').as('headshotCount'),
       sum<number>('three_kill_count').as('threeKillCount'),

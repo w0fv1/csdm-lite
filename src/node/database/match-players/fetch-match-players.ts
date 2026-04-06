@@ -76,17 +76,17 @@ export async function fetchMatchPlayers(checksum: string): Promise<MatchPlayer[]
       });
     })
     .select(
-      sql<number>`COUNT(kills.id) FILTER (WHERE kills.penetrated_objects > 0 AND kills.killer_steam_id = players.steam_id)`.as(
+      sql<number>`SUM(CASE WHEN kills.penetrated_objects > 0 AND kills.killer_steam_id = players.steam_id THEN 1 ELSE 0 END)`.as(
         'wallbangKillCount',
       ),
     )
     .select(
-      sql<number>`COUNT(kills.id) FILTER (WHERE kills.is_no_scope = true AND kills.killer_steam_id = players.steam_id)`.as(
+      sql<number>`SUM(CASE WHEN kills.is_no_scope = 1 AND kills.killer_steam_id = players.steam_id THEN 1 ELSE 0 END)`.as(
         'noScopeKillCount',
       ),
     )
     .select(
-      sql<number>`COUNT(kills.id) FILTER (WHERE kills.is_victim_inspecting_weapon = true AND kills.victim_steam_id = players.steam_id)`.as(
+      sql<number>`SUM(CASE WHEN kills.is_victim_inspecting_weapon = 1 AND kills.victim_steam_id = players.steam_id THEN 1 ELSE 0 END)`.as(
         'deathWhileInspectingWeaponCount',
       ),
     )

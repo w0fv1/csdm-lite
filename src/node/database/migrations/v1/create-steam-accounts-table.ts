@@ -1,6 +1,5 @@
-import { sql, type ExpressionBuilder } from 'kysely';
+import { sql } from 'kysely';
 import type { Migration } from '../migration';
-import type { Database } from '../../schema';
 
 const createSteamAccountsTable: Migration = {
   schemaVersion: 1,
@@ -18,67 +17,45 @@ const createSteamAccountsTable: Migration = {
       .addColumn('game_ban_count', 'integer', (col) => col.notNull())
       .addColumn('economy_ban', 'varchar', (col) => col.notNull())
       .addColumn('creation_date', 'timestamptz')
-      .addColumn('created_at', 'timestamp', (col) => col.notNull().defaultTo(sql`now()`))
-      .addColumn('updated_at', 'timestamp', (col) => col.notNull().defaultTo(sql`now()`))
+      .addColumn('created_at', 'timestamp', (col) => col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`))
+      .addColumn('updated_at', 'timestamp', (col) => col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`))
       .execute();
 
-    // Trigger to delete SteamIDs from the ignored_steam_accounts table when a row is deleted.
-    const cleanupIgnoredSteamAccountsTableFunction = sql`
-    CREATE OR REPLACE FUNCTION cleanup_ignored_steam_accounts_tables()
-    RETURNS trigger
-    LANGUAGE PLPGSQL
-    AS
-    $$
-    BEGIN
-      DELETE FROM ignored_steam_accounts WHERE steam_id = OLD.steam_id;
-      RETURN OLD;
-    END;
-    $$`;
-    await cleanupIgnoredSteamAccountsTableFunction.execute(transaction);
-
     const deleteTrigger = sql`
-    CREATE TRIGGER steam_account_deleted
+    CREATE TRIGGER IF NOT EXISTS steam_account_deleted
     BEFORE DELETE
     ON steam_accounts
-    FOR EACH ROW
-    EXECUTE PROCEDURE cleanup_ignored_steam_accounts_tables();`;
+    FOR EACH ROW BEGIN
+      DELETE FROM ignored_steam_accounts WHERE steam_id = OLD.steam_id;
+      DELETE FROM steam_account_tags WHERE steam_id = OLD.steam_id;
+      DELETE FROM steam_account_overrides WHERE steam_id = OLD.steam_id;
+    END;`;
     await deleteTrigger.execute(transaction);
 
-    const updateUpdatedAtFunction = sql`
-    CREATE FUNCTION update_updated_at_steam_account()
-    RETURNS TRIGGER
-    LANGUAGE PLPGSQL
-    AS $$
-    BEGIN
-      NEW.updated_at = now();
-      RETURN NEW;
-    END;
-    $$;
-    `;
-    await updateUpdatedAtFunction.execute(transaction);
-
     const updateTrigger = sql`
-    CREATE TRIGGER update_steam_account_updated_at
-    BEFORE UPDATE
-    ON
-        steam_accounts
+    CREATE TRIGGER IF NOT EXISTS update_steam_account_updated_at
+    AFTER UPDATE
+    ON steam_accounts
     FOR EACH ROW
-    EXECUTE PROCEDURE update_updated_at_steam_account();`;
+    WHEN NEW.updated_at = OLD.updated_at
+    BEGIN
+      UPDATE steam_accounts
+      SET updated_at = CURRENT_TIMESTAMP
+      WHERE steam_id = NEW.steam_id;
+    END;`;
     await updateTrigger.execute(transaction);
 
+    await sql`DROP VIEW IF EXISTS player_ban_per_match`.execute(transaction);
     await transaction.schema
       .createView('player_ban_per_match')
-      .orReplace()
       .as(
         transaction
           .with('match_steam_ids_with_date', (qb) => {
             return (
               qb
                 .selectFrom('matches')
-                // @ts-expect-error The date column has been removed from the matches table in the v12 migration.
-                // Since the v12 migration, the date for both matches and demos is stored in the demos table to serve as
-                // a single source of truth.
-                .select(['matches.checksum', 'matches.date as match_date'])
+                .innerJoin('demos', 'demos.checksum', 'matches.checksum')
+                .select(['matches.checksum', 'demos.date as match_date'])
                 .leftJoin('players', 'matches.checksum', 'players.match_checksum')
                 .select(['players.steam_id'])
             );
@@ -90,7 +67,7 @@ const createSteamAccountsTable: Migration = {
           ])
           .leftJoin('steam_accounts', 'steam_accounts.steam_id', 'match_steam_ids_with_date.steam_id')
           .whereRef('steam_accounts.last_ban_date', '>=', 'match_steam_ids_with_date.match_date')
-          .where('steam_accounts.steam_id', 'not in', (qb: ExpressionBuilder<Database, 'ignored_steam_accounts'>) => {
+          .where('steam_accounts.steam_id', 'not in', (qb) => {
             return qb.selectFrom('ignored_steam_accounts').select('steam_id');
           })
           .groupBy(['match_steam_ids_with_date.checksum']),

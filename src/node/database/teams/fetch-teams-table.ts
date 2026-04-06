@@ -2,6 +2,7 @@ import { sql } from 'kysely';
 import { db } from 'csdm/node/database/database';
 import type { TeamsTableFilter } from './teams-table-filter';
 import type { TeamTable } from 'csdm/common/types/team-table';
+import { ensureDate } from '../ensure-date';
 
 export async function fetchTeamsTable(filter: TeamsTableFilter): Promise<TeamTable[]> {
   const { count, sum, avg, max } = db.fn;
@@ -19,13 +20,13 @@ export async function fetchTeamsTable(filter: TeamsTableFilter): Promise<TeamTab
       sum<number>('five_kill_count').as('fiveKillCount'),
       avg<number>('headshot_percentage').as('headshotPercentage'),
       avg<number>('kast').as('kast'),
-      sql<number>`SUM(players.kill_count)::NUMERIC / NULLIF(SUM(players.death_count), 0)::NUMERIC`.as('killDeathRatio'),
+      sql<number>`(SUM(players.kill_count) * 1.0) / NULLIF(SUM(players.death_count), 0)`.as('killDeathRatio'),
       avg<number>('hltv_rating').as('hltvRating'),
       avg<number>('hltv_rating_2').as('hltvRating2'),
       avg<number>('average_damage_per_round').as('averageDamagePerRound'),
     ])
     .innerJoin('demos', 'demos.checksum', 'teams.match_checksum')
-    .select([max(sql<string>`to_char(demos.date, 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')`).as('lastMatchDate')])
+    .select([max('demos.date').as('lastMatchDate')])
     .leftJoin('players', (join) => {
       return join
         .onRef('players.match_checksum', '=', 'teams.match_checksum')
@@ -39,7 +40,13 @@ export async function fetchTeamsTable(filter: TeamsTableFilter): Promise<TeamTab
     query = query.where(sql<boolean>`demos.date between ${startDate} and ${endDate}`);
   }
 
-  const teams = await query.execute();
+  const rows = await query.execute();
+  const teams: TeamTable[] = rows.map((row) => {
+    return {
+      ...row,
+      lastMatchDate: ensureDate(row.lastMatchDate).toISOString(),
+    };
+  });
 
   return teams;
 }

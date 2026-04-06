@@ -10,7 +10,7 @@ export class HelpCommand extends Command {
   }
 
   public printHelp() {
-    console.log(`CS Demo Manager ${pkg.version}`);
+    console.log(`CS Demo Manager Lite ${pkg.version}`);
     console.log('');
     console.log('\tUsage: csdm <command> [arguments]');
     console.log('');

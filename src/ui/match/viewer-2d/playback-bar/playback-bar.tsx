@@ -12,6 +12,7 @@ import { useViewerContext } from '../use-viewer-context';
 import { DocumentationLink } from 'csdm/ui/components/links/documentation-link';
 import { DrawingButton } from './drawing-button';
 import type { DrawableCanvas } from '../drawing/use-drawable-canvas';
+import { getApplicationGuideUrl } from 'csdm/common/urls';
 
 type Props = {
   drawing: DrawableCanvas;
@@ -32,7 +33,7 @@ export function PlaybackBar({ drawing }: Props) {
       <LowerRadarButton />
       <FullscreenButton />
       <div className="flex items-center px-8">
-        <DocumentationLink url="https://cs-demo-manager.com/docs/guides/2d-viewer" />
+        <DocumentationLink url={getApplicationGuideUrl('2d-viewer')} />
       </div>
     </div>
   );

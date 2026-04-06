@@ -35,6 +35,7 @@ import { getPlaybackErrorMessageFromErrorCode } from 'csdm/ui/shared/get-playbac
 import type { CameraCoordinates } from 'csdm/common/types/camera';
 import { getGameName } from 'csdm/ui/shared/get-game-name';
 import { roundNumber } from 'csdm/common/math/round-number';
+import { getApplicationGuideUrl } from 'csdm/common/urls';
 
 function InputsRow({ children }: { children: ReactNode }) {
   return <div className="flex gap-x-12">{children}</div>;
@@ -204,7 +205,7 @@ export function CameraForm({ nameInput, error, onSubmit }: Props) {
       </DialogContent>
       <DialogFooter>
         <div className="mr-auto">
-          <ExternalLink href="https://cs-demo-manager.com/docs/guides/cameras">
+          <ExternalLink href={getApplicationGuideUrl('cameras')}>
             <Trans>Documentation</Trans>
           </ExternalLink>
         </div>

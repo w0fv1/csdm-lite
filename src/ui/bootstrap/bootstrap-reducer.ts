@@ -24,7 +24,7 @@ export const bootstrapReducer = createReducer(initialState, (builder) => {
       state.error = action.payload.error;
     })
     .addCase(disconnectDatabaseSuccess, (state) => {
-      state.databaseStatus = DatabaseStatus.Disconnected;
+      state.databaseStatus = DatabaseStatus.Idle;
       state.error = undefined;
     });
 });

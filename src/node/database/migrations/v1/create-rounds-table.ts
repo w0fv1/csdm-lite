@@ -6,7 +6,7 @@ const createRoundsTable: Migration = {
     await transaction.schema
       .createTable('rounds')
       .ifNotExists()
-      .addColumn('id', 'bigserial', (col) => col.primaryKey().notNull())
+      .addColumn('id', 'integer', (col) => col.primaryKey().notNull())
       .addColumn('match_checksum', 'varchar', (col) => col.notNull())
       .addForeignKeyConstraint('rounds_match_checksum_fk', ['match_checksum'], 'matches', ['checksum'], (cb) =>
         cb.onDelete('cascade'),

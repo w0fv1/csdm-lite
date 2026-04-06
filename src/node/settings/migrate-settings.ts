@@ -7,6 +7,7 @@ import { getSettings } from './get-settings';
 import { getAllMigrations } from './get-all-migrations';
 import { CURRENT_SCHEMA_VERSION } from './schema-version';
 import type { Migration } from './migration';
+import { ensureSettingsDatabaseFilePath } from './ensure-settings-database-file-path';
 
 function getMigrationsForUpgrade(migrations: Migration[], currentSchemaVersion: number) {
   return migrations.filter((migration) => {
@@ -16,7 +17,7 @@ function getMigrationsForUpgrade(migrations: Migration[], currentSchemaVersion: 
 
 export async function migrateSettings(): Promise<Settings> {
   let schemaVersion = 0;
-  let settings = defaultSettings;
+  let settings = ensureSettingsDatabaseFilePath(defaultSettings);
   const settingsFilePath = getSettingsFilePath();
   const settingsFileExists = await fs.pathExists(settingsFilePath);
   if (settingsFileExists) {
@@ -26,8 +27,9 @@ export async function migrateSettings(): Promise<Settings> {
 
   const isDowngrade = schemaVersion > CURRENT_SCHEMA_VERSION;
   if (isDowngrade) {
-    await writeSettings(defaultSettings);
-    return defaultSettings;
+    const normalizedSettings = ensureSettingsDatabaseFilePath(defaultSettings);
+    await writeSettings(normalizedSettings);
+    return normalizedSettings;
   }
 
   const isUpgrade = schemaVersion < CURRENT_SCHEMA_VERSION;
@@ -42,6 +44,7 @@ export async function migrateSettings(): Promise<Settings> {
   }
 
   settings.schemaVersion = CURRENT_SCHEMA_VERSION;
+  settings = ensureSettingsDatabaseFilePath(settings);
   await writeSettings(settings);
 
   return settings;

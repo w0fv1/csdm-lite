@@ -1,10 +1,9 @@
-import { DatabaseError } from 'pg';
 import { db } from 'csdm/node/database/database';
-import { PostgresqlErrorCode } from '../postgresql-error-code';
 import { assertValidTag } from './assert-valid-tag';
 import { TagNameAlreadyTaken } from './errors/tag-name-already-taken';
 import { tagRowToTag } from './tag-row-to-tag';
 import type { InsertableTag } from './tag-table';
+import { isSqliteUniqueConstraintError } from '../is-sqlite-error';
 
 export async function insertTag(tag: InsertableTag) {
   assertValidTag(tag);
@@ -15,11 +14,8 @@ export async function insertTag(tag: InsertableTag) {
 
     return newTag;
   } catch (error) {
-    if (error instanceof DatabaseError) {
-      switch (error.code) {
-        case PostgresqlErrorCode.UniqueViolation:
-          throw new TagNameAlreadyTaken();
-      }
+    if (isSqliteUniqueConstraintError(error)) {
+      throw new TagNameAlreadyTaken();
     }
     throw error;
   }

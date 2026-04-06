@@ -6,7 +6,7 @@ const createFaceitMatchPlayersTable: Migration = {
     await transaction.schema
       .createTable('faceit_match_players')
       .ifNotExists()
-      .addColumn('id', 'bigserial', (col) => col.primaryKey().notNull())
+      .addColumn('id', 'integer', (col) => col.primaryKey().notNull())
       .addColumn('faceit_id', 'varchar', (col) => col.notNull())
       .addColumn('name', 'varchar', (col) => col.notNull())
       .addColumn('avatar_url', 'varchar', (col) => col.notNull())

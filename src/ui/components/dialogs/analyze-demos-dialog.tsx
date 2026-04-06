@@ -5,6 +5,7 @@ import type { Demo } from 'csdm/common/types/demo';
 import { Checkbox } from '../inputs/checkbox';
 import { useAddDemosToAnalyses } from 'csdm/ui/hooks/use-add-demos-to-analyses';
 import { ExternalLink } from '../external-link';
+import { getApplicationGuideUrl } from 'csdm/common/urls';
 
 type Props = {
   analyzableDemos: Demo[];
@@ -53,9 +54,7 @@ export function AnalyzeConfirmationDialog({
             <p>
               <Trans>
                 Please see this{' '}
-                <ExternalLink href="https://cs-demo-manager.com/docs/guides/demos-analysis#the-demo-source-is-not-supported">
-                  documentation
-                </ExternalLink>{' '}
+                <ExternalLink href={getApplicationGuideUrl('the-demo-source-is-not-supported')}>documentation</ExternalLink>{' '}
                 for details.
               </Trans>
             </p>

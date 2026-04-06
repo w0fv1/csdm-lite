@@ -19,7 +19,7 @@ export function DatabaseLoader({ children }: Props) {
   const databaseStatus = useDatabaseStatus();
 
   useEffect(() => {
-    if (databaseStatus !== DatabaseStatus.Idle) {
+    if (databaseStatus !== DatabaseStatus.Idle && databaseStatus !== DatabaseStatus.Disconnected) {
       return;
     }
 
@@ -38,12 +38,12 @@ export function DatabaseLoader({ children }: Props) {
     void connectDatabase();
   }, [databaseStatus, client, dispatch]);
 
-  if (databaseStatus === DatabaseStatus.Idle) {
-    return <Loading />;
+  if (databaseStatus === DatabaseStatus.Error) {
+    return <ConnectDatabase />;
   }
 
-  if (databaseStatus === DatabaseStatus.Error || databaseStatus === DatabaseStatus.Disconnected) {
-    return <ConnectDatabase />;
+  if (databaseStatus === DatabaseStatus.Idle || databaseStatus === DatabaseStatus.Disconnected) {
+    return <Loading />;
   }
 
   return children;

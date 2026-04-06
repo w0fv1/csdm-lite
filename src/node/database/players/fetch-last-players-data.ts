@@ -1,5 +1,6 @@
 import type { Game, Rank } from 'csdm/common/types/counter-strike';
 import { db } from '../database';
+import { ensureDate } from '../ensure-date';
 
 export type LastPlayersData = {
   steamId: string;
@@ -42,23 +43,20 @@ export async function fetchLastPlayersData(steamIds: string[]): Promise<LastPlay
     ])
     .innerJoin('demos', 'demos.checksum', 'players.match_checksum')
     .select(['demos.date as lastMatchDate', 'demos.game as game'])
-    .where((eb) => eb('players.steam_id', '=', eb.fn.any(eb.val(steamIds))))
-    .groupBy([
-      'demos.checksum',
-      'players.steam_id',
-      'players.name',
-      'players.rank',
-      'players.wins_count',
-      'lastKnownName',
-      'steam_accounts.avatar',
-      'lastBanDate',
-      'isCommunityBanned',
-      'vacBanCount',
-      'gameBanCount',
-      'economyBan',
-    ])
+    .where('players.steam_id', 'in', steamIds)
     .orderBy('demos.date', 'desc')
     .execute();
 
-  return lastPlayersData;
+  const uniquePlayers = new Map<string, LastPlayersData>();
+  for (const row of lastPlayersData) {
+    if (!uniquePlayers.has(row.steamId)) {
+      uniquePlayers.set(row.steamId, {
+        ...row,
+        lastMatchDate: ensureDate(row.lastMatchDate),
+        lastBanDate: row.lastBanDate ? ensureDate(row.lastBanDate) : null,
+      });
+    }
+  }
+
+  return [...uniquePlayers.values()];
 }

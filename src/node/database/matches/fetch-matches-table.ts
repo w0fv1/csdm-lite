@@ -64,7 +64,7 @@ export async function fetchMatchesTable(filters: MatchTableFilters): Promise<Mat
       sum<number>('players.five_kill_count').as('fiveKillCount'),
       sum<number>('players.four_kill_count').as('fourKillCount'),
       sum<number>('players.three_kill_count').as('threeKillCount'),
-      sql<number>`ROUND(AVG(players.hltv_rating_2)::numeric, 2)`.as('hltvRating2'),
+      sql<number>`ROUND(AVG(players.hltv_rating_2), 2)`.as('hltvRating2'),
       'comments.comment',
       'player_ban_count as banned_player_count',
     ])

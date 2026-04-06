@@ -6,7 +6,7 @@ const createInfernoPositionsTable: Migration = {
     await transaction.schema
       .createTable('inferno_positions')
       .ifNotExists()
-      .addColumn('id', 'bigserial', (col) => col.primaryKey().notNull())
+      .addColumn('id', 'integer', (col) => col.primaryKey().notNull())
       .addColumn('match_checksum', 'varchar', (col) => col.notNull())
       .addForeignKeyConstraint(
         'inferno_position_match_checksum_fk',

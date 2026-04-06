@@ -18,11 +18,12 @@ export type Folder = {
 };
 
 export type DatabaseSettings = {
-  readonly hostname: string;
-  readonly port: number;
-  readonly username: string;
-  readonly password: string;
-  readonly database: string;
+  readonly filePath: string;
+  readonly hostname?: string;
+  readonly port?: number;
+  readonly username?: string;
+  readonly password?: string;
+  readonly database?: string;
 };
 
 type DemosSettings = DemosTableFilter & {

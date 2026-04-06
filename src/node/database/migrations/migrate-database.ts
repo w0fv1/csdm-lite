@@ -1,9 +1,7 @@
-import { DatabaseError } from 'pg';
 import { sql } from 'kysely';
 import { db } from 'csdm/node/database/database';
 import { ensureMigrationsTableExists } from 'csdm/node/database/migrations/ensure-migrations-table-exists';
 import { resetDatabase } from '../reset-database';
-import { PostgresqlErrorCode } from '../postgresql-error-code';
 import type { Migration } from './migration';
 import { getAllMigrations } from './get-all-migrations';
 import { DatabaseSchemaVersionMismatch } from '../database-schema-version-mismatch-error';
@@ -21,21 +19,19 @@ function getMigrationsForUpgrade(migrations: Migration[], currentSchemaVersion: 
 }
 
 async function getCurrentSchemaVersion() {
-  try {
-    const migrationRow = await db
-      .selectFrom('migrations')
-      .select('schema_version as schemaVersion')
-      .orderBy('schema_version', 'desc')
-      .executeTakeFirst();
-
-    return migrationRow?.schemaVersion ?? 0;
-  } catch (error) {
-    if (error instanceof DatabaseError && error.code === PostgresqlErrorCode.UndefinedTable) {
-      return 0;
-    }
-
-    throw error;
+  const tables = await db.introspection.getTables();
+  const hasMigrationsTable = tables.some((table) => table.name === 'migrations');
+  if (!hasMigrationsTable) {
+    return 0;
   }
+
+  const migrationRow = await db
+    .selectFrom('migrations')
+    .select('schema_version as schemaVersion')
+    .orderBy('schema_version', 'desc')
+    .executeTakeFirst();
+
+  return migrationRow?.schemaVersion ?? 0;
 }
 
 export async function migrateDatabase() {
@@ -79,7 +75,7 @@ export async function migrateDatabase() {
         .insertInto('migrations')
         .values({
           schema_version: CURRENT_SCHEMA_VERSION,
-          run_at: sql`now()`,
+          run_at: sql`CURRENT_TIMESTAMP`,
         })
         .execute();
     });

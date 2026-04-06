@@ -15,6 +15,7 @@ import { ExternalLink } from 'csdm/ui/components/external-link';
 import { Donate } from 'csdm/ui/components/donate';
 import { Status } from 'csdm/common/types/status';
 import { Spinner } from 'csdm/ui/components/spinner';
+import { getReleaseApiUrl, getReleaseTagUrl, RELEASES_URL, REPOSITORY_URL } from 'csdm/common/urls';
 
 function directiveStylingPlugin() {
   return function (tree: Root) {
@@ -38,6 +39,20 @@ function directiveStylingPlugin() {
   };
 }
 
+async function markdownToHtml(markdown: string) {
+  const processor = unified()
+    .use(remarkParse)
+    .use(remarkDirective)
+    .use(directiveStylingPlugin)
+    .use(remarkRehype, { allowDangerousHtml: true })
+    .use(rehypeExternalLinks, { rel: ['noopener', 'noreferrer'], target: '_blank' })
+    .use(rehypeStringify);
+
+  const file = await processor.process(markdown);
+
+  return String(file);
+}
+
 export function ChangelogDialog() {
   const { hideDialog } = useDialog();
   const [status, setStatus] = useState<Status>(Status.Loading);
@@ -46,47 +61,45 @@ export function ChangelogDialog() {
   useEffect(() => {
     void (async () => {
       try {
-        const response = await fetch(
-          'https://raw.githubusercontent.com/akiver/cs-demo-manager.com/refs/heads/main/src/pages/changelog.mdx',
-          {
-            headers: {
-              'User-Agent': 'CS:DM',
-            },
+        const response = await fetch(getReleaseApiUrl(APP_VERSION), {
+          headers: {
+            Accept: 'application/vnd.github+json',
+            'User-Agent': 'csdm-lite',
           },
-        );
-        const text = await response.text();
-        const versions = text.split('## v').filter((version) => {
-          const trimmedVersion = version.trim();
-          return trimmedVersion !== '' && trimmedVersion.startsWith('3');
         });
-        if (versions.length === 0) {
-          throw new Error('No versions found in the changelog');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch release notes with status ${response.status}`);
         }
 
-        let [markdown] = versions;
-        // remove the version number
-        markdown = markdown.replace(/\d+\.\d+\.\d+/g, '');
-        // remove the OSS info directive
-        markdown = markdown.replace(/:::[\w-]+\n([\s\S]*?):::/g, '');
-        // prepend https://cs-demo-manager.com to links
-        markdown = markdown.replace(/]\((\/[^)]+)\)/g, `](https://cs-demo-manager.com$1)`);
-
-        const processor = unified()
-          .use(remarkParse)
-          .use(remarkDirective)
-          .use(directiveStylingPlugin)
-          .use(remarkRehype, { allowDangerousHtml: true })
-          .use(rehypeExternalLinks, { rel: ['noopener', 'noreferrer'], target: '_blank' })
-          .use(rehypeStringify);
-
-        const file = await processor.process(markdown);
-
-        setHtml(String(file));
+        const release = (await response.json()) as { body?: string };
+        const markdown = release.body?.trim();
+        if (!markdown) {
+          throw new Error(`No release notes found for version ${APP_VERSION}`);
+        }
+        setHtml(await markdownToHtml(markdown));
         setStatus(Status.Success);
       } catch (error) {
         logger.log('Failed to fetch changelog');
         logger.error(error);
-        setStatus(Status.Error);
+        try {
+          const fallbackMarkdown = [
+            '# Release notes',
+            '',
+            'Release notes for this fork are published on GitHub Releases.',
+            '',
+            `- Current version: \`${APP_VERSION}\``,
+            `- Repository: ${REPOSITORY_URL}`,
+            `- Releases: ${RELEASES_URL}`,
+            '',
+            'If release notes are not available yet, the current build may not have been published on GitHub Releases.',
+          ].join('\n');
+          setHtml(await markdownToHtml(fallbackMarkdown));
+          setStatus(Status.Success);
+        } catch (fallbackError) {
+          logger.log('Failed to render fallback changelog');
+          logger.error(fallbackError);
+          setStatus(Status.Error);
+        }
       }
     })();
   }, []);
@@ -125,8 +138,11 @@ export function ChangelogDialog() {
         </div>
       </DialogContent>
       <DialogFooter>
-        <ExternalLink href="https://cs-demo-manager.com">
-          <Trans>Visit website</Trans>
+        <ExternalLink href={getReleaseTagUrl(APP_VERSION)}>
+          <Trans>View release notes</Trans>
+        </ExternalLink>
+        <ExternalLink href={RELEASES_URL}>
+          <Trans>View releases</Trans>
         </ExternalLink>
         <CloseButton onClick={hideDialog} />
       </DialogFooter>

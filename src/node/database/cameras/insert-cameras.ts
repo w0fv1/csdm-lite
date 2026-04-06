@@ -1,12 +1,19 @@
+import { randomUUID } from 'node:crypto';
 import { db } from 'csdm/node/database/database';
 import type { InsertableCamera } from './cameras-table';
-import { DatabaseError } from 'pg';
-import { PostgresqlErrorCode } from '../postgresql-error-code';
 import { CameraAlreadyExists } from './errors/camera-already-exists';
+import { isSqliteUniqueConstraintError } from '../is-sqlite-error';
 
 export async function insertCamera(camera: InsertableCamera) {
   try {
-    const rows = await db.insertInto('cameras').values(camera).returningAll().execute();
+    const rows = await db
+      .insertInto('cameras')
+      .values({
+        id: camera.id ?? randomUUID(),
+        ...camera,
+      })
+      .returningAll()
+      .execute();
 
     if (rows.length === 0) {
       throw new Error('Failed to insert camera');
@@ -14,11 +21,8 @@ export async function insertCamera(camera: InsertableCamera) {
 
     return rows[0];
   } catch (error) {
-    if (error instanceof DatabaseError) {
-      switch (error.code) {
-        case PostgresqlErrorCode.UniqueViolation:
-          throw new CameraAlreadyExists();
-      }
+    if (isSqliteUniqueConstraintError(error)) {
+      throw new CameraAlreadyExists();
     }
 
     throw error;

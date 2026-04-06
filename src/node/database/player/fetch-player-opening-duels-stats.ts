@@ -71,8 +71,8 @@ export async function fetchPlayerOpeningDuelsStats(
     .selectFrom(['opening_duels'])
     .select([
       'opening_duels.player_side',
-      sql<number>`ROUND(SUM(is_success)::numeric / COUNT(*) * 100)`.as('success_percentage'),
-      sql<number>`ROUND(SUM(is_traded)::numeric / COUNT(*) * 100)`.as('trade_percentage'),
+      sql<number>`ROUND(SUM(is_success) * 100.0 / COUNT(*))`.as('success_percentage'),
+      sql<number>`ROUND(SUM(is_traded) * 100.0 / COUNT(*))`.as('trade_percentage'),
     ])
     .leftJoin('weapon_stats', 'weapon_stats.player_side', 'opening_duels.player_side')
     .select([sql`MAX(CASE WHEN weapon_stats.rn = 1 THEN weapon_stats.weapon_name END)`.as('best_weapon')])
@@ -83,8 +83,8 @@ export async function fetchPlayerOpeningDuelsStats(
         .leftJoin('weapon_stats', 'weapon_stats.player_side', 'opening_duels.player_side')
         .select([
           sql<number>`0`.as('player_side'),
-          sql<number>`ROUND(SUM(is_success)::numeric / COUNT(*) * 100)`.as('success_percentage'),
-          sql<number>`ROUND(SUM(is_traded)::numeric / COUNT(*) * 100)`.as('trade_percentage'),
+          sql<number>`ROUND(SUM(is_success) * 100.0 / COUNT(*))`.as('success_percentage'),
+          sql<number>`ROUND(SUM(is_traded) * 100.0 / COUNT(*))`.as('trade_percentage'),
           eb
             .selectFrom('opening_duels')
             .select('weapon_name')

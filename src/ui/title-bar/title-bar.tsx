@@ -29,7 +29,7 @@ export function TitleBar() {
       {!window.csdm.isMac && <MenuButton />}
       <div className="mx-auto flex items-center gap-x-16">
         {databaseStatus === DatabaseStatus.Connected && <HistoryNavigation />}
-        <p>{`CS Demo Manager ${APP_VERSION}`}</p>
+        <p>{`CS Demo Manager Lite ${APP_VERSION}`}</p>
         <UpdateAvailableButton />
       </div>
       {!window.csdm.isMac && <WindowControls />}

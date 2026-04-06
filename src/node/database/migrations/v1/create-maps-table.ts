@@ -7,7 +7,7 @@ const createMapsTable: Migration = {
     await transaction.schema
       .createTable('maps')
       .ifNotExists()
-      .addColumn('id', 'bigserial', (col) => col.primaryKey().notNull())
+      .addColumn('id', 'integer', (col) => col.primaryKey().notNull())
       .addColumn('name', 'varchar', (col) => col.notNull())
       .addColumn('game', 'varchar', (col) => col.notNull())
       .addColumn('position_x', 'integer', (col) => col.notNull())

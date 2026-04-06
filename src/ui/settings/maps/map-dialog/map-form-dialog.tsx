@@ -16,6 +16,7 @@ import { useMapForm } from 'csdm/ui/settings/maps/map-dialog/use-map-form';
 import { Trans } from '@lingui/react/macro';
 import { ExternalLink } from 'csdm/ui/components/external-link';
 import { ThresholdZInput } from './threshold-z-input';
+import { getApplicationGuideUrl } from 'csdm/common/urls';
 
 function InputsRow({ children }: { children: ReactNode }) {
   return <div className="flex gap-x-12">{children}</div>;
@@ -84,7 +85,7 @@ export function MapFormDialog({ nameInput, error, onSubmit }: Props) {
       </DialogContent>
       <DialogFooter>
         <div className="mr-auto">
-          <ExternalLink href="https://cs-demo-manager.com/docs/guides/maps#addingediting-a-map">
+          <ExternalLink href={getApplicationGuideUrl('adding-or-editing-a-map')}>
             <Trans>Documentation</Trans>
           </ExternalLink>
         </div>

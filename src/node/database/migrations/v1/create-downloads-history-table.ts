@@ -8,7 +8,7 @@ const createDownloadHistoryTable: Migration = {
       .createTable('download_history')
       .ifNotExists()
       .addColumn('match_id', 'varchar', (col) => col.primaryKey())
-      .addColumn('downloaded_at', 'timestamp', (col) => col.notNull().defaultTo(sql`now()`))
+      .addColumn('downloaded_at', 'timestamp', (col) => col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`))
       .execute();
   },
 };

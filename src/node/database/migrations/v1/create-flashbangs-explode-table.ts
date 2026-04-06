@@ -6,7 +6,7 @@ const createFlashbangsExplodeTable: Migration = {
     await transaction.schema
       .createTable('flashbangs_explode')
       .ifNotExists()
-      .addColumn('id', 'bigserial', (col) => col.primaryKey().notNull())
+      .addColumn('id', 'integer', (col) => col.primaryKey().notNull())
       .addColumn('match_checksum', 'varchar', (col) => col.notNull())
       .addForeignKeyConstraint(
         'flashbangs_explode_match_checksum_fk',

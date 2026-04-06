@@ -19,22 +19,20 @@ export async function fetchPlayersRoundCountStats(
     .selectFrom('rounds')
     .select([
       count<number>('rounds.id').as('totalCount'),
-      sql<number>`COUNT(rounds.id) FILTER (
-        WHERE rounds.team_a_name = players.team_name
-        AND rounds.team_a_side = ${TeamNumber.CT}
-        OR (
-          rounds.team_b_name = players.team_name
-          AND rounds.team_b_side = ${TeamNumber.CT}
-          )
-        )`.as('roundCountAsCt'),
-      sql<number>`COUNT(rounds.id) FILTER (
-          WHERE rounds.team_a_name = players.team_name
-          AND rounds.team_a_side = ${TeamNumber.T}
-          OR (
-            rounds.team_b_name = players.team_name
-            AND rounds.team_b_side = ${TeamNumber.T}
-            )
-          )`.as('roundCountAsT'),
+      sql<number>`SUM(CASE
+        WHEN (
+          (rounds.team_a_name = players.team_name AND rounds.team_a_side = ${TeamNumber.CT}) OR
+          (rounds.team_b_name = players.team_name AND rounds.team_b_side = ${TeamNumber.CT})
+        ) THEN 1
+        ELSE 0
+      END)`.as('roundCountAsCt'),
+      sql<number>`SUM(CASE
+        WHEN (
+          (rounds.team_a_name = players.team_name AND rounds.team_a_side = ${TeamNumber.T}) OR
+          (rounds.team_b_name = players.team_name AND rounds.team_b_side = ${TeamNumber.T})
+        ) THEN 1
+        ELSE 0
+      END)`.as('roundCountAsT'),
     ])
     .innerJoin('matches', 'matches.checksum', 'rounds.match_checksum')
     .innerJoin('demos', 'demos.checksum', 'matches.checksum')

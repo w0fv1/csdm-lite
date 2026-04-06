@@ -367,13 +367,13 @@ export function createApplicationMenu(client: WebSocketClient) {
         message: 'Documentation',
       }),
       click: async () => {
-        await shell.openExternal('https://cs-demo-manager.com/docs');
+        await shell.openExternal('https://github.com/w0fv1/csdm-lite/tree/main/docs');
       },
     },
     {
       label: 'GitHub',
       click: async () => {
-        await shell.openExternal('https://github.com/akiver/cs-demo-manager');
+        await shell.openExternal('https://github.com/w0fv1/csdm-lite');
       },
     },
   ];

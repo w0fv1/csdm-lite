@@ -1,6 +1,9 @@
-name: Publish new release
+name: Publish release
 
 on:
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:
     inputs:
       release-type:
@@ -10,17 +13,25 @@ on:
         options:
           - patch
           - minor
+      version:
+        type: string
+        description: Exact version to publish (optional, for example 3.19.0-lite)
+        required: false
+
+permissions:
+  contents: write
 
 jobs:
   ensure-changes:
     name: Ensure there are changes
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0 # Required to get all existing tags
+          fetch-depth: 0
           fetch-tags: true
 
       - name: Stop if there are no new changes
@@ -36,25 +47,20 @@ jobs:
 
   build-macos:
     name: Build macOS
+    if: always() && (github.event_name == 'push' || needs.ensure-changes.result == 'success') && (github.event_name == 'push' || secrets.APPLE_APPLICATION_CERTIFICATE != '')
     runs-on: macos-latest
-    needs: ensure-changes
+    needs: [ensure-changes]
 
     steps:
       - name: Install Apple certificate
+        if: secrets.APPLE_APPLICATION_CERTIFICATE != ''
         run: |
-          # create variables
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-
-          # import certificate and provisioning profile from secrets
           echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
-
-          # create temporary keychain
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-
-          # import certificate to keychain
           security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
         env:
@@ -63,8 +69,7 @@ jobs:
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
 
       - name: Install required tools
-        run: |
-          brew install python-setuptools
+        run: brew install python-setuptools
 
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -75,10 +80,15 @@ jobs:
           node-version-file: .node-version
 
       - name: Create new version
+        if: github.event_name == 'workflow_dispatch'
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          npm version ${{ github.event.inputs.release-type }} -m "chore: v%s"
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            npm version "${{ github.event.inputs.version }}" -m "chore: v%s"
+          else
+            npm version "${{ github.event.inputs.release-type }}" -m "chore: v%s"
+          fi
 
       - name: Package and create release
         run: |
@@ -88,15 +98,16 @@ jobs:
         env:
           STEAM_API_KEYS: ${{ secrets.STEAM_API_KEYS }}
           FACEIT_API_KEY: ${{ secrets.FACEIT_API_KEY }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
 
   build-linux:
     name: Build Linux
+    if: always() && (github.event_name == 'push' || needs.ensure-changes.result == 'success')
     runs-on: ubuntu-latest
-    needs: ensure-changes
+    needs: [ensure-changes]
 
     steps:
       - name: Checkout repository
@@ -108,10 +119,15 @@ jobs:
           node-version-file: .node-version
 
       - name: Create new version
+        if: github.event_name == 'workflow_dispatch'
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          npm version ${{ github.event.inputs.release-type }} -m "chore: v%s"
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            npm version "${{ github.event.inputs.version }}" -m "chore: v%s"
+          else
+            npm version "${{ github.event.inputs.release-type }}" -m "chore: v%s"
+          fi
 
       - name: Package and create release
         run: |
@@ -121,12 +137,13 @@ jobs:
         env:
           STEAM_API_KEYS: ${{ secrets.STEAM_API_KEYS }}
           FACEIT_API_KEY: ${{ secrets.FACEIT_API_KEY }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
 
   build-windows:
-    name: Build Windows
+    name: Build Windows installer and portable
+    if: always() && (github.event_name == 'push' || needs.ensure-changes.result == 'success')
     runs-on: windows-latest
-    needs: ensure-changes
+    needs: [ensure-changes]
 
     steps:
       - name: Checkout repository
@@ -138,25 +155,31 @@ jobs:
           node-version-file: .node-version
 
       - name: Create new version
+        if: github.event_name == 'workflow_dispatch'
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          npm version ${{ github.event.inputs.release-type }} -m "chore: v%s"
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            npm version "${{ github.event.inputs.version }}" -m "chore: v%s"
+          else
+            npm version "${{ github.event.inputs.release-type }}" -m "chore: v%s"
+          fi
 
       - name: Package and create release
         run: |
           npm install
           npm run build
-          npm run package -- --win --publish=always
+          npm run package -- --win nsis portable --publish=always
         env:
           STEAM_API_KEYS: ${{ secrets.STEAM_API_KEYS }}
           FACEIT_API_KEY: ${{ secrets.FACEIT_API_KEY }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
 
   publish-on-github:
-    name: Publish on GitHub
+    name: Push version bump and tag
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    needs: [build-macos, build-linux, build-windows]
+    needs: [build-linux, build-windows]
 
     steps:
       - name: Checkout repository
@@ -174,7 +197,11 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          npm version ${{ github.event.inputs.release-type }} -m "chore: v%s"
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            npm version "${{ github.event.inputs.version }}" -m "chore: v%s"
+          else
+            npm version "${{ github.event.inputs.release-type }}" -m "chore: v%s"
+          fi
 
       - name: Push the tag to GitHub
         run: git push origin main --tags

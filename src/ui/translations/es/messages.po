@@ -333,40 +333,38 @@ msgid "An error occurred while loading the application."
 msgstr ""
 
 #: src/ui/bootstrap/connect-database/connect-database-button.tsx
+#: src/ui/components/buttons/retry-button.tsx
 msgctxt "Button"
-msgid "Connect"
+msgid "Retry"
 msgstr ""
 
 #: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "It looks like you installed an older version of CS Demo Manager and the current database schema is not compatible with it."
+msgid "It looks like you installed an older version of CS Demo Manager Lite and the current database schema is not compatible with it."
 msgstr ""
 
 #: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "You can either update CS Demo Manager to the latest version or reset the database to start from scratch."
+msgid "You can either update CS Demo Manager Lite to the latest version or reset the database to start from scratch."
 msgstr ""
 
 #: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "It usually means that PostgreSQL is not installed on your system or the path to the <0>psql</0> executable is not in your <1>PATH</1> environment variable."
+msgid "This error usually means that the local database could not be opened yet."
 msgstr ""
 
 #: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "It usually means that the PostgreSQL service is not running, make sure it's running."
+msgid "Make sure the SQLite database file is accessible and your settings are correct."
 msgstr ""
 
 #: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "This error usually means that the database is not running or that the connection settings are incorrect."
+msgid "Opening the local database failed with the following error:"
 msgstr ""
 
 #: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "Make sure PostgreSQL is running and your settings are correct."
+msgid "CS Demo Manager Lite opens its local SQLite database automatically."
 msgstr ""
 
 #: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "The connection to the database failed with the following error:"
-msgstr ""
-
-#: src/ui/bootstrap/connect-database/connect-database.tsx
-msgid "CS Demo Manager requires a PostgreSQL database."
+#: src/ui/settings/database/database.tsx
+msgid "Database file"
 msgstr ""
 
 #: src/ui/bootstrap/connect-database/connect-database.tsx
@@ -414,7 +412,11 @@ msgid "Changelog version {APP_VERSION}"
 msgstr ""
 
 #: src/ui/changelog/changelog-dialog.tsx
-msgid "Visit website"
+msgid "View release notes"
+msgstr ""
+
+#: src/ui/changelog/changelog-dialog.tsx
+msgid "View releases"
 msgstr ""
 
 #: src/ui/components/buttons/analyze-button.tsx
@@ -508,11 +510,6 @@ msgstr ""
 #: src/ui/components/buttons/reset-button.tsx
 msgctxt "Button"
 msgid "Reset"
-msgstr ""
-
-#: src/ui/components/buttons/retry-button.tsx
-msgctxt "Button"
-msgid "Retry"
 msgstr ""
 
 #: src/ui/components/buttons/reveal-button.tsx
@@ -1148,19 +1145,19 @@ msgid "Enemy"
 msgstr ""
 
 #: src/ui/components/donate.tsx
-msgid "Donate"
+msgid "Support"
 msgstr ""
 
 #: src/ui/components/donate.tsx
-msgid "CS Demo Manager is a project that I started during college in 2014 and maintained as much as I can since then."
+msgid "CS Demo Manager Lite is a community-maintained SQLite fork of the original CS Demo Manager project."
 msgstr ""
 
 #: src/ui/components/donate.tsx
-msgid "It's not backed by any corporate entity and is a free and open-source software that I hope you enjoy using."
+msgid "The original project was created and maintained upstream, and this fork focuses on keeping a lightweight local SQLite workflow available."
 msgstr ""
 
 #: src/ui/components/donate.tsx
-msgid "Your <0>donation</0> is greatly appreciated and motivates me to continue working on CS Demo Manager. Thank you!"
+msgid "The best way to support this fork right now is to file issues, test releases, and contribute improvements on <0>GitHub</0>."
 msgstr ""
 
 #: src/ui/components/dropdown-filter/analysis-status-select.tsx

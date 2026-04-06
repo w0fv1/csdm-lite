@@ -7,7 +7,7 @@ const createPlayersTable: Migration = {
     await transaction.schema
       .createTable('players')
       .ifNotExists()
-      .addColumn('id', 'bigserial', (col) => col.primaryKey().notNull())
+      .addColumn('id', 'integer', (col) => col.primaryKey().notNull())
       .addColumn('match_checksum', 'varchar', (col) => col.notNull())
       .addForeignKeyConstraint('players_match_checksum_fk', ['match_checksum'], 'matches', ['checksum'], (cb) =>
         cb.onDelete('cascade'),
@@ -22,14 +22,14 @@ const createPlayersTable: Migration = {
       .addColumn('kill_death_ratio', 'float4', (col) =>
         col
           .notNull()
-          .generatedAlwaysAs(sql`ROUND(kill_count/GREATEST(death_count,1)::numeric, 2)`)
+          .generatedAlwaysAs(sql`ROUND((kill_count * 1.0) / CASE WHEN death_count = 0 THEN 1 ELSE death_count END, 2)`)
           .stored(),
       )
       .addColumn('headshot_count', 'integer', (col) => col.notNull())
       .addColumn('headshot_percentage', 'float4', (col) =>
         col
           .notNull()
-          .generatedAlwaysAs(sql`ROUND(headshot_count*100/GREATEST(kill_count,1))`)
+          .generatedAlwaysAs(sql`ROUND((headshot_count * 100.0) / CASE WHEN kill_count = 0 THEN 1 ELSE kill_count END)`)
           .stored(),
       )
       .addColumn('damage_health', 'integer', (col) => col.notNull())

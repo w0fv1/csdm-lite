@@ -54,7 +54,7 @@ export async function fetchMatchFlashbangMatrixRows(checksum: string): Promise<F
         return eb.fn.coalesce('p2_overrides.name', 'p2.name').as('flashedName');
       },
       't2.current_side as flashedTeamSide',
-      sql<number>`COALESCE(ROUND(AVG(pb.duration)::numeric, 2), 0)`.as('duration'),
+      sql<number>`COALESCE(ROUND(AVG(pb.duration), 2), 0)`.as('duration'),
     ])
     .orderBy('p1.team_name')
     .orderBy('flasherName')

@@ -6,7 +6,7 @@ const createBombsPlantStartTable: Migration = {
     await transaction.schema
       .createTable('bombs_plant_start')
       .ifNotExists()
-      .addColumn('id', 'bigserial', (col) => col.primaryKey().notNull())
+      .addColumn('id', 'integer', (col) => col.primaryKey().notNull())
       .addColumn('match_checksum', 'varchar', (col) => col.notNull())
       .addForeignKeyConstraint(
         'bombs_plant_start_match_checksum_fk',

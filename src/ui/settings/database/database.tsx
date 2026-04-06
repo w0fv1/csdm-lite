@@ -1,24 +1,17 @@
 import React from 'react';
-import { PortInput } from '../../components/inputs/port-input';
-import { DatabaseNameInput } from '../../components/inputs/database-name-input';
-import { UsernameInput } from '../../components/inputs/username-input';
-import { PasswordInput } from '../../components/inputs/password-input';
-import { DisconnectDatabaseButton } from './disconnect-database-button';
+import { Trans } from '@lingui/react/macro';
 import { useDatabaseSettings } from './use-database-settings';
-import { HostnameInput } from 'csdm/ui/components/inputs/hostname-input';
+import { TextInput } from 'csdm/ui/components/inputs/text-input';
+import { RevealFileInExplorerButton } from 'csdm/ui/components/buttons/reveal-file-in-explorer-button';
 
 export function Database() {
-  const { hostname, port, username, password, database } = useDatabaseSettings();
+  const { filePath } = useDatabaseSettings();
 
   return (
-    <div className="flex max-w-[264px] flex-col gap-y-8">
-      <HostnameInput hostname={hostname} />
-      <DatabaseNameInput databaseName={database} />
-      <UsernameInput username={username} />
-      <PasswordInput password={password} />
-      <PortInput port={port} />
-      <div className="mt-12">
-        <DisconnectDatabaseButton />
+    <div className="flex max-w-[420px] flex-col gap-y-8">
+      <TextInput label={<Trans>Database file</Trans>} value={filePath} isReadOnly={true} />
+      <div className="flex gap-x-8">
+        <RevealFileInExplorerButton path={filePath} />
       </div>
     </div>
   );

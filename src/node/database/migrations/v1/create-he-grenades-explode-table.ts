@@ -6,7 +6,7 @@ const createHeGrenadesExplodeTable: Migration = {
     await transaction.schema
       .createTable('he_grenades_explode')
       .ifNotExists()
-      .addColumn('id', 'bigserial', (col) => col.primaryKey().notNull())
+      .addColumn('id', 'integer', (col) => col.primaryKey().notNull())
       .addColumn('match_checksum', 'varchar', (col) => col.notNull())
       .addForeignKeyConstraint(
         'he_grenades_explode_match_checksum_fk',

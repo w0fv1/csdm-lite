@@ -1,34 +1,40 @@
-import type { Expression, SqlBool } from 'kysely';
+import { sql } from 'kysely';
 import { db } from 'csdm/node/database/database';
 import type { PlayerResult } from 'csdm/common/types/search/player-result';
 import type { PlayersFilter } from 'csdm/common/types/search/players-filter';
 
 export async function searchPlayers({ steamIdOrName, ignoredSteamIds }: PlayersFilter) {
+  const likePattern = `%${steamIdOrName.toLowerCase()}%`;
   const query = db
     .selectFrom('players')
     .select(['players.steam_id', 'players.name'])
-    .distinctOn(['players.steam_id'])
-    .where(({ eb, or, and }) => {
-      const filters: Expression<SqlBool>[] = [
-        or([eb('players.steam_id', '=', steamIdOrName), eb('players.name', 'ilike', `%${steamIdOrName}%`)]),
-      ];
-
-      if (ignoredSteamIds.length > 0) {
-        filters.push(eb('players.steam_id', 'not in', ignoredSteamIds));
-      }
-
-      return and(filters);
+    .where(({ eb, or }) => {
+      return or([
+        eb('players.steam_id', '=', steamIdOrName),
+        sql<boolean>`LOWER(players.name) LIKE ${likePattern}`,
+      ]);
     })
-    .limit(20);
+    .orderBy('players.steam_id')
+    .orderBy('players.name');
 
   const rows = await query.execute();
+  const seenSteamIds = new Set<string>();
+  const players: PlayerResult[] = [];
+  for (const row of rows) {
+    if (ignoredSteamIds.includes(row.steam_id) || seenSteamIds.has(row.steam_id)) {
+      continue;
+    }
 
-  const players: PlayerResult[] = rows.map((row) => {
-    return {
+    seenSteamIds.add(row.steam_id);
+    players.push({
       name: row.name,
       steamId: row.steam_id,
-    };
-  });
+    });
+
+    if (players.length === 20) {
+      break;
+    }
+  }
 
   return players;
 }

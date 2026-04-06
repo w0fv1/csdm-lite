@@ -2,6 +2,7 @@ import { sql } from 'kysely';
 import { db } from 'csdm/node/database/database';
 import { TeamLetter } from 'csdm/common/types/counter-strike';
 import type { LastMatch } from 'csdm/common/types/last-match';
+import { ensureDate } from '../ensure-date';
 
 export async function fetchTeamLastMatches(teamName: string): Promise<LastMatch[]> {
   const matches = await db
@@ -24,11 +25,16 @@ export async function fetchTeamLastMatches(teamName: string): Promise<LastMatch[
       'demos.game',
       'demos.map_name as mapName',
       'matches.winner_name as winnerName',
-      sql<string>`to_char(demos.date, 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')`.as('date'),
+      'demos.date as date',
       'teamA.score as scoreTeamA',
       'teamB.score as scoreTeamB',
     ])
     .execute();
 
-  return matches;
+  return matches.map((match) => {
+    return {
+      ...match,
+      date: ensureDate(match.date).toISOString(),
+    };
+  }) as LastMatch[];
 }

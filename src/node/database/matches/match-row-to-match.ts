@@ -4,6 +4,7 @@ import { fetchChecksumTagIds } from '../tags/fetch-checksum-tag-ids';
 import type { Team } from '../../../common/types/team';
 import type { CollateralKillPerMatch } from './fetch-collateral-kill-count-per-match';
 import type { DemoRow } from '../demos/demo-table';
+import { ensureDate } from '../ensure-date';
 
 export async function matchRowToMatch(
   row: DemoRow & MatchRow,
@@ -24,13 +25,13 @@ export async function matchRowToMatch(
     clientName: row.client_name,
     serverName: row.server_name,
     tickCount: row.tick_count,
-    date: row.date.toISOString(),
+    date: ensureDate(row.date).toISOString(),
     killCount: row.kill_count,
     assistCount: row.assist_count,
     deathCount: row.death_count,
     collateralKillCount: collateralKillCountPerMatch[row.checksum] ?? 0,
     duration: row.duration,
-    analyzeDate: row.analyze_date.toISOString(),
+    analyzeDate: ensureDate(row.analyze_date).toISOString(),
     shotCount: row.shot_count,
     winnerName: row.winner_name,
     winnerSide: row.winner_side,

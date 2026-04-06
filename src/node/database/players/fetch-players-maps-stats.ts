@@ -37,13 +37,13 @@ function buildStatsQuery(steamIds: string[], filters?: MatchFilters) {
     .select([
       'players.steam_id as steamId',
       'demos.map_name as mapName',
-      sql<number>`COUNT(matches.checksum) FILTER (WHERE matches.winner_name = players.team_name)`.as('winCount'),
-      sql<number>`COUNT(matches.checksum) FILTER (WHERE matches.winner_name IS NOT NULL AND matches.winner_name != players.team_name)`.as(
+      sql<number>`SUM(CASE WHEN matches.winner_name = players.team_name THEN 1 ELSE 0 END)`.as('winCount'),
+      sql<number>`SUM(CASE WHEN matches.winner_name IS NOT NULL AND matches.winner_name != players.team_name THEN 1 ELSE 0 END)`.as(
         'lostCount',
       ),
-      sql<number>`COUNT(matches.checksum) FILTER (WHERE matches.winner_name IS NULL)`.as('tiedCount'),
+      sql<number>`SUM(CASE WHEN matches.winner_name IS NULL THEN 1 ELSE 0 END)`.as('tiedCount'),
       count<number>('matches.checksum').as('matchCount'),
-      sql<number>`SUM(players.kill_count)::NUMERIC / NULLIF(SUM(players.death_count), 0)::NUMERIC`.as('killDeathRatio'),
+      sql<number>`(SUM(players.kill_count) * 1.0) / NULLIF(SUM(players.death_count), 0)`.as('killDeathRatio'),
       avg<number>('players.average_damage_per_round').as('averageDamagesPerRound'),
       avg<number>('players.kast').as('kast'),
       avg<number>('players.headshot_percentage').as('headshotPercentage'),
@@ -70,18 +70,18 @@ function buildRoundsQuery(steamIds: string[], filters?: MatchFilters) {
     .select([
       'players.steam_id as steamId',
       'demos.map_name as mapName',
-      sql<number>`COUNT(rounds.id) FILTER (WHERE rounds.winner_name = players.team_name)`.as('roundWinCount'),
-      sql<number>`COUNT(rounds.id) FILTER (WHERE rounds.winner_name IS NOT NULL AND rounds.winner_name != players.team_name)`.as(
+      sql<number>`SUM(CASE WHEN rounds.winner_name = players.team_name THEN 1 ELSE 0 END)`.as('roundWinCount'),
+      sql<number>`SUM(CASE WHEN rounds.winner_name IS NOT NULL AND rounds.winner_name != players.team_name THEN 1 ELSE 0 END)`.as(
         'roundLostCount',
       ),
-      sql<number>`COUNT(rounds.id) FILTER (WHERE rounds.winner_name = players.team_name AND rounds.winner_side = 3)`.as(
+      sql<number>`SUM(CASE WHEN rounds.winner_name = players.team_name AND rounds.winner_side = 3 THEN 1 ELSE 0 END)`.as(
         'roundWinCountAsCt',
       ),
-      sql<number>`COUNT(rounds.id) FILTER (WHERE rounds.winner_name = players.team_name AND rounds.winner_side = 2)`.as(
+      sql<number>`SUM(CASE WHEN rounds.winner_name = players.team_name AND rounds.winner_side = 2 THEN 1 ELSE 0 END)`.as(
         'roundWinCountAsT',
       ),
-      sql<number>`COUNT(rounds.id) FILTER (WHERE rounds.winner_side = 2)`.as('roundCountAsT'),
-      sql<number>`COUNT(rounds.id) FILTER (WHERE rounds.winner_side = 3)`.as('roundCountAsCt'),
+      sql<number>`SUM(CASE WHEN rounds.winner_side = 2 THEN 1 ELSE 0 END)`.as('roundCountAsT'),
+      sql<number>`SUM(CASE WHEN rounds.winner_side = 3 THEN 1 ELSE 0 END)`.as('roundCountAsCt'),
       count<number>('rounds.id').as('roundCount'),
     ])
     .where('players.steam_id', 'in', steamIds)

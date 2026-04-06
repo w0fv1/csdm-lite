@@ -25,15 +25,15 @@ if (shouldNotarize) {
  * @see https://www.electron.build/configuration/configuration
  */
 const config = {
-  appId: 'com.akiver.csdm',
+  appId: 'com.w0fv1.csdm-lite',
   copyright: 'Copyright © 2014-present AkiVer',
-  productName: 'CS Demo Manager',
+  productName: 'CS Demo Manager Lite',
   publish: {
     provider: 'github',
   },
   releaseInfo: {
     releaseName: `v${pkg.version}`,
-    releaseNotes: `https://cs-demo-manager.com/changelog#v${pkg.version.replaceAll('.', '')}`,
+    releaseNotes: `${pkg.repository}/releases/tag/v${pkg.version}`,
   },
   fileAssociations: {
     ext: 'dem',
@@ -42,11 +42,17 @@ const config = {
     role: 'Viewer',
   },
   win: {
-    target: {
-      target: 'nsis',
-      arch: ['x64'],
-    },
-    executableName: 'cs-demo-manager',
+    target: [
+      {
+        target: 'nsis',
+        arch: ['x64'],
+      },
+      {
+        target: 'portable',
+        arch: ['x64'],
+      },
+    ],
+    executableName: 'csdm-lite',
     extraFiles: [
       {
         from: 'build-assets/bin/csdm.cmd',
@@ -60,6 +66,12 @@ const config = {
         filter: ['!**/*.so', '!**/*.dylib'],
       },
     ],
+  },
+  nsis: {
+    artifactName: 'CS Demo Manager Setup ${version}.${ext}',
+  },
+  portable: {
+    artifactName: 'CS Demo Manager Portable ${version}.${ext}',
   },
   mac: {
     target: [
@@ -75,7 +87,8 @@ const config = {
       },
     ],
     category: 'public.app-category.developer-tools',
-    appId: 'com.akiver.csdm',
+    appId: 'com.w0fv1.csdm-lite',
+    artifactName: 'CS Demo Manager ${version}-${arch}.${ext}',
     notarize: shouldNotarize,
     extraResources: [
       // From https://developer.apple.com/forums/thread/128166
@@ -100,7 +113,8 @@ const config = {
     ],
   },
   linux: {
-    executableName: 'cs-demo-manager',
+    executableName: 'csdm-lite',
+    artifactName: 'CS Demo Manager ${version}-${arch}.${ext}',
     target: [
       { target: 'deb', arch: ['x64'] },
       { target: 'rpm', arch: ['x64'] },

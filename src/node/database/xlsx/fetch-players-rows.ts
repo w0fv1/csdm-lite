@@ -104,9 +104,9 @@ export async function fetchPlayersRows(filters: Filters): Promise<PlayerRow[]> {
     .select(avg<number>('average_damage_per_round').as('averageDamagePerRound'))
     .select(avg<number>('average_kill_per_round').as('averageKillsPerRound'))
     .select(avg<number>('average_death_per_round').as('averageDeathsPerRound'))
-    .select(sql<number>`ROUND(AVG(utility_damage_per_round)::numeric, 1)`.as('averageUtilityDamagePerRound'))
+    .select(sql<number>`ROUND(AVG(utility_damage_per_round), 1)`.as('averageUtilityDamagePerRound'))
     .select(
-      sql<number>`ROUND(SUM("players"."kill_count") / GREATEST(SUM("players"."death_count"), 1)::NUMERIC, 1)`.as(
+      sql<number>`ROUND((SUM("players"."kill_count") * 1.0) / CASE WHEN SUM("players"."death_count") > 0 THEN SUM("players"."death_count") ELSE 1 END, 1)`.as(
         'killDeathRatio',
       ),
     )

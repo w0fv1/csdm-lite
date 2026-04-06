@@ -137,31 +137,40 @@ export async function insertMatchPositions({
   outputFolderPath,
   databaseSettings,
 }: InsertMatchPositionsParameters) {
-  await Promise.all([
-    insertPlayersPositions({
-      databaseSettings,
-      outputFolderPath,
-      demoName,
-    }),
-    insertGrenadePositions({
-      databaseSettings,
-      outputFolderPath,
-      demoName,
-    }),
-    insertInfernoPositions({
-      databaseSettings,
-      outputFolderPath,
-      demoName,
-    }),
-    insertHostagePositions({
-      databaseSettings,
-      outputFolderPath,
-      demoName,
-    }),
-    insertChickenPositions({
-      databaseSettings,
-      outputFolderPath,
-      demoName,
-    }),
-  ]);
+  const insertSteps = [
+    () =>
+      insertPlayersPositions({
+        databaseSettings,
+        outputFolderPath,
+        demoName,
+      }),
+    () =>
+      insertGrenadePositions({
+        databaseSettings,
+        outputFolderPath,
+        demoName,
+      }),
+    () =>
+      insertInfernoPositions({
+        databaseSettings,
+        outputFolderPath,
+        demoName,
+      }),
+    () =>
+      insertHostagePositions({
+        databaseSettings,
+        outputFolderPath,
+        demoName,
+      }),
+    () =>
+      insertChickenPositions({
+        databaseSettings,
+        outputFolderPath,
+        demoName,
+      }),
+  ];
+
+  for (const insertStep of insertSteps) {
+    await insertStep();
+  }
 }

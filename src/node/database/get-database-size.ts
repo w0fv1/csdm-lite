@@ -1,14 +1,10 @@
-import { sql } from 'kysely';
+import fs from 'fs-extra';
 import { getSettings } from '../settings/get-settings';
-import { db } from './database';
 
 export async function getDatabaseSize(): Promise<string> {
   const settings = await getSettings();
-  const { database } = settings;
-  const query = sql<{
-    size: string;
-  }>`select pg_size_pretty(pg_database_size(${database.database})) as size`;
-  const { rows } = await query.execute(db);
+  const stats = await fs.stat(settings.database.filePath);
+  const sizeInMegaBytes = stats.size / (1024 * 1024);
 
-  return rows.length > 0 ? rows[0].size : '0 MB';
+  return `${sizeInMegaBytes.toFixed(1)} MB`;
 }

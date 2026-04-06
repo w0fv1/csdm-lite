@@ -6,22 +6,23 @@ export function Donate() {
   return (
     <div className="flex flex-col">
       <h3 className="text-subtitle">
-        <Trans>Donate</Trans>
+        <Trans>Support</Trans>
       </h3>
       <p>
         <Trans>
-          CS Demo Manager is a project that I started during college in 2014 and maintained as much as I can since then.
+          CS Demo Manager Lite is a community-maintained SQLite fork of the original CS Demo Manager project.
         </Trans>
       </p>
       <p>
         <Trans>
-          It's not backed by any corporate entity and is a free and open-source software that I hope you enjoy using.
+          The original project was created and maintained upstream, and this fork focuses on keeping a lightweight
+          local SQLite workflow available.
         </Trans>
       </p>
       <p>
         <Trans>
-          Your <ExternalLink href="https://cs-demo-manager.com/download">donation</ExternalLink> is greatly appreciated
-          and motivates me to continue working on CS Demo Manager. Thank you!
+          The best way to support this fork right now is to file issues, test releases, and contribute improvements on{' '}
+          <ExternalLink href="https://github.com/w0fv1/csdm-lite">GitHub</ExternalLink>.
         </Trans>
       </p>
     </div>

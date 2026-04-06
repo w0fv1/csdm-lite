@@ -1,13 +1,12 @@
 import { db } from 'csdm/node/database/database';
 import type { BannedSteamAccount } from 'csdm/common/types/banned-steam-account';
+import { ensureDate } from '../ensure-date';
 
 export async function fetchBannedSteamAccounts(ignoreBanBeforeFirstSeen: boolean) {
   const { ref } = db.dynamic;
   let query = db
     .selectFrom('steam_accounts')
     .select(['steam_accounts.steam_id', 'steam_accounts.avatar', 'steam_accounts.name', 'steam_accounts.last_ban_date'])
-    .distinctOn('steam_accounts.steam_id')
-    .distinctOn('steam_accounts.last_ban_date')
     .where('steam_accounts.last_ban_date', 'is not', null)
     .where('steam_accounts.steam_id', 'not in', (qb) => {
       return qb.selectFrom('ignored_steam_accounts').select('ignored_steam_accounts.steam_id');
@@ -25,15 +24,22 @@ export async function fetchBannedSteamAccounts(ignoreBanBeforeFirstSeen: boolean
   }
 
   const rows = await query.execute();
-  const bannedAccounts = rows.map<BannedSteamAccount>((row) => {
-    return {
+  const bannedAccounts: BannedSteamAccount[] = [];
+  const seenSteamIds = new Set<string>();
+  for (const row of rows) {
+    if (seenSteamIds.has(row.steam_id)) {
+      continue;
+    }
+
+    seenSteamIds.add(row.steam_id);
+    bannedAccounts.push({
       steamId: row.steam_id,
       name: row.name,
       avatar: row.avatar,
-      lastBanDate: row.last_ban_date?.toISOString() ?? '',
+      lastBanDate: row.last_ban_date ? ensureDate(row.last_ban_date).toISOString() : '',
       rank: row.rank ?? 0,
-    };
-  });
+    });
+  }
 
   return bannedAccounts;
 }

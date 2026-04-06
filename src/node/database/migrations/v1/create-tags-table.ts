@@ -8,32 +8,21 @@ const createTagsTable: Migration = {
     await transaction.schema
       .createTable('tags')
       .ifNotExists()
-      .addColumn('id', 'bigserial', (col) => col.primaryKey().notNull())
+      .addColumn('id', 'integer', (col) => col.primaryKey().notNull())
       .addColumn('name', 'varchar', (col) => col.notNull().unique())
       .addColumn('color', 'varchar', (col) => col.notNull())
       .execute();
 
-    // Trigger to delete checksum/tag_id relationship in the table "checksum_tag" when a tag is deleted.
-    const cleanupChecksumTagTable = sql`
-    CREATE OR REPLACE FUNCTION delete_checksum_tag_relation()
-    RETURNS trigger
-    LANGUAGE PLPGSQL
-    AS
-    $$
-    BEGIN
-      DELETE FROM checksum_tags
-      WHERE tag_id IN(OLD.id);
-      RETURN OLD;
-    END;
-    $$`;
-    await cleanupChecksumTagTable.execute(transaction);
-
     const deleteTrigger = sql`
-    CREATE TRIGGER tag_deleted
+    CREATE TRIGGER IF NOT EXISTS tag_deleted
     BEFORE DELETE
     ON tags
     FOR EACH ROW
-    EXECUTE PROCEDURE delete_checksum_tag_relation();`;
+    BEGIN
+      DELETE FROM checksum_tags WHERE tag_id = OLD.id;
+      DELETE FROM round_tags WHERE tag_id = OLD.id;
+      DELETE FROM steam_account_tags WHERE tag_id = OLD.id;
+    END;`;
     await deleteTrigger.execute(transaction);
 
     await insertDefaultTags(transaction);

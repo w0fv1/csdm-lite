@@ -860,7 +860,7 @@ export type InsertMatchParameters = {
  * The reason is that inserting data from CSV files is much faster than SQL INSERT statements.
  * A 64 tick demo generates around 600K rows containing players position, it takes only ~6s to insert it from a CSV file.
  *
- * CSVs are inserted using the psql "\copy" command, thus the CLI must be installed on the host machine.
+ * CSVs are inserted directly into SQLite after the demo analyzer export.
  * It could be possible to insert CSV files from the server side using the "COPY FROM" statement, but in case of a
  * remote database it would require to upload those files.
  */
@@ -876,153 +876,203 @@ export async function insertMatch({ checksum, demoPath, outputFolderPath }: Inse
       outputFolderPath,
       demoName,
     });
+    await db
+      .insertInto('demo_paths')
+      .values({
+        checksum,
+        file_path: demoPath,
+      })
+      .onConflict((oc) => oc.columns(['checksum', 'file_path']).doNothing())
+      .execute();
+
     await insertMatchFromCsv({
       databaseSettings,
       outputFolderPath,
       demoName,
     });
 
-    await Promise.all([
-      insertTeamsFromCsv({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertRounds({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertPlayers({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertKillsFromCsv({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertBombsPlantedFromCsv({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertBombsDefusedFromCsv({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertBombsExplodedFromCsv({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertBombsDefuseStartFromCsv({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertBombsPlantStartFromCsv({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertClutchesFromCsv({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertPlayersFlashedFromCsv({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertPlayersEconomies({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertShots({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertDamages({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertPlayersBuy({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertHostageRescued({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertHostagePickUpStart({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertHostagePickedUp({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertChickenDeaths({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertHeGrenadesExplode({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertSmokesStart({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertDecoysStart({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertFlashbangsExplode({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertGrenadeBounces({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertGrenadeProjectilesDestroy({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertChatMessages({
-        databaseSettings,
-        outputFolderPath,
-        demoName,
-      }),
-      insertMatchPositions({
-        demoName,
-        databaseSettings,
-        outputFolderPath,
-      }),
-    ]);
+    const insertSteps = [
+      () =>
+        insertTeamsFromCsv({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertRounds({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertPlayers({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertKillsFromCsv({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertBombsPlantedFromCsv({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertBombsDefusedFromCsv({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertBombsExplodedFromCsv({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertBombsDefuseStartFromCsv({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertBombsPlantStartFromCsv({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertClutchesFromCsv({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertPlayersFlashedFromCsv({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertPlayersEconomies({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertShots({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertDamages({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertPlayersBuy({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertHostageRescued({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertHostagePickUpStart({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertHostagePickedUp({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertChickenDeaths({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertHeGrenadesExplode({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertSmokesStart({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertDecoysStart({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertFlashbangsExplode({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertGrenadeBounces({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertGrenadeProjectilesDestroy({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertChatMessages({
+          databaseSettings,
+          outputFolderPath,
+          demoName,
+        }),
+      () =>
+        insertMatchPositions({
+          demoName,
+          databaseSettings,
+          outputFolderPath,
+        }),
+    ];
+
+    for (const insertStep of insertSteps) {
+      await insertStep();
+    }
   } catch (error) {
-    // It's not possible to use a transaction since data are inserted with the psql CLI.
+    // The import mixes file I/O and DB writes, so the higher-level orchestration stays outside a single transaction.
     // Mimic a rollback in case of error by deleting the match we were trying to insert.
-    await deleteMatchesByChecksums([checksum]);
+    console.error(error);
+    logger.error('Error while inserting match');
+    logger.error(error);
+
+    try {
+      await deleteMatchesByChecksums([checksum]);
+    } catch (cleanupError) {
+      logger.error('Error while cleaning up a failed match insertion');
+      logger.error(cleanupError);
+    }
+
     throw error;
   } finally {
     await deleteCsvFilesInOutputFolder(outputFolderPath);

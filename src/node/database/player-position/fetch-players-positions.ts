@@ -7,7 +7,6 @@ export async function fetchPlayersPositions(checksum: string, roundNumber: numbe
   const rows = await db
     .selectFrom('player_positions as p')
     .leftJoin('steam_account_overrides', 'steam_account_overrides.steam_id', 'p.player_steam_id')
-    .distinctOn(['p.tick', 'p.player_steam_id'])
     .select([
       (eb) => {
         return eb.fn.coalesce('steam_account_overrides.name', 'p.player_name').as('player_name');
@@ -50,8 +49,15 @@ export async function fetchPlayersPositions(checksum: string, roundNumber: numbe
     .orderBy('p.tick')
     .orderBy('p.player_steam_id')
     .execute();
+  const uniqueRows = rows.filter((row, index, allRows) => {
+    return (
+      allRows.findIndex((candidate) => {
+        return candidate.tick === row.tick && candidate.player_steam_id === row.player_steam_id;
+      }) === index
+    );
+  });
 
-  const playerPositions: PlayerPosition[] = fillMissingTicks(rows.map(playerPositionRowToPlayerPosition));
+  const playerPositions: PlayerPosition[] = fillMissingTicks(uniqueRows.map(playerPositionRowToPlayerPosition));
 
   return playerPositions;
 }

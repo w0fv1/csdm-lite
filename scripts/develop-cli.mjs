@@ -24,8 +24,9 @@ const context = await esbuild.context({
     'process.env.FACEIT_API_KEY': `"${process.env.FACEIT_API_KEY}"`,
   },
   external: [
-    'pg-native',
     '@aws-sdk/client-s3', // the unzipper module has it as a dev dependency
+    'better-sqlite3',
+    'better-sqlite3/build/Release/better_sqlite3.node',
   ],
   alias: {
     // Force fdir to use the CJS version to avoid createRequire(import.meta.url) not working

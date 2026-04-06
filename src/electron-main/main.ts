@@ -1,7 +1,7 @@
 process.env.PROCESS_NAME = 'main';
 import '../common/install-source-map-support';
 import 'csdm/node/logger';
-import { type BrowserWindow, type Tray, type Event } from 'electron';
+import type { BrowserWindow, Tray, Event } from 'electron';
 import { app, ipcMain, dialog } from 'electron';
 import fs from 'fs-extra';
 import { i18n } from '@lingui/core';

@@ -87,18 +87,18 @@ function buildRoundsQuery({ name, ...filters }: TeamFilters) {
     .innerJoin('teams', 'teams.match_checksum', 'matches.checksum')
     .select([
       'demos.map_name as mapName',
-      sql<number>`COUNT(rounds.id) FILTER (WHERE rounds.winner_name = ${sql`${name}`})`.as('roundWinCount'),
-      sql<number>`COUNT(rounds.id) FILTER (WHERE rounds.winner_name IS NOT NULL AND rounds.winner_name != ${sql`${name}`})`.as(
+      sql<number>`SUM(CASE WHEN rounds.winner_name = ${name} THEN 1 ELSE 0 END)`.as('roundWinCount'),
+      sql<number>`SUM(CASE WHEN rounds.winner_name IS NOT NULL AND rounds.winner_name != ${name} THEN 1 ELSE 0 END)`.as(
         'roundLostCount',
       ),
-      sql<number>`COUNT(rounds.id) FILTER (WHERE rounds.winner_name = ${sql`${name}`} AND rounds.winner_side = 3)`.as(
+      sql<number>`SUM(CASE WHEN rounds.winner_name = ${name} AND rounds.winner_side = 3 THEN 1 ELSE 0 END)`.as(
         'roundWinCountAsCt',
       ),
-      sql<number>`COUNT(rounds.id) FILTER (WHERE rounds.winner_name = ${sql`${name}`} AND rounds.winner_side = 2)`.as(
+      sql<number>`SUM(CASE WHEN rounds.winner_name = ${name} AND rounds.winner_side = 2 THEN 1 ELSE 0 END)`.as(
         'roundWinCountAsT',
       ),
-      sql<number>`COUNT(rounds.id) FILTER (WHERE rounds.winner_side = 2)`.as('roundCountAsT'),
-      sql<number>`COUNT(rounds.id) FILTER (WHERE rounds.winner_side = 3)`.as('roundCountAsCt'),
+      sql<number>`SUM(CASE WHEN rounds.winner_side = 2 THEN 1 ELSE 0 END)`.as('roundCountAsT'),
+      sql<number>`SUM(CASE WHEN rounds.winner_side = 3 THEN 1 ELSE 0 END)`.as('roundCountAsCt'),
       count<number>('rounds.id').as('roundCount'),
     ])
     .where('teams.name', '=', name)

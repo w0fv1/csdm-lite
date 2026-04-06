@@ -3,20 +3,22 @@ import { defaultSettings } from './default-settings';
 import { getSettingsFilePath } from './get-settings-file-path';
 import type { Settings } from './settings';
 import { writeSettings } from './write-settings';
+import { ensureSettingsDatabaseFilePath } from './ensure-settings-database-file-path';
 
-let recoveringSettings: Settings = defaultSettings;
+let recoveringSettings: Settings = ensureSettingsDatabaseFilePath(defaultSettings);
 
 export async function getSettings(): Promise<Settings> {
   try {
     const settingsFilePath = getSettingsFilePath();
     const settingsFileExists = await fs.pathExists(settingsFilePath);
     if (!settingsFileExists) {
-      await writeSettings(defaultSettings);
-      return defaultSettings;
+      const settings = ensureSettingsDatabaseFilePath(defaultSettings);
+      await writeSettings(settings);
+      return settings;
     }
 
     const json = await fs.readFile(settingsFilePath, 'utf8');
-    const settings: Settings = JSON.parse(json);
+    const settings = ensureSettingsDatabaseFilePath(JSON.parse(json));
 
     recoveringSettings = settings;
 
@@ -43,14 +45,14 @@ export function getSettingsSync() {
     const settingsFilePath = getSettingsFilePath();
     const settingsFileExists = fs.existsSync(settingsFilePath);
     if (!settingsFileExists) {
-      return defaultSettings;
+      return ensureSettingsDatabaseFilePath(defaultSettings);
     }
 
     const json = fs.readFileSync(settingsFilePath, 'utf8');
-    return JSON.parse(json);
+    return ensureSettingsDatabaseFilePath(JSON.parse(json));
   } catch (error) {
     logger.error('Failed to parse settings file synchronously');
     logger.error(error);
-    return defaultSettings;
+    return ensureSettingsDatabaseFilePath(defaultSettings);
   }
 }

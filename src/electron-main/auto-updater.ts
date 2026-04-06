@@ -1,20 +1,32 @@
 import { ipcMain } from 'electron';
-import { autoUpdater } from 'electron-updater';
 import { Notification } from 'electron';
 import { i18n } from '@lingui/core';
 import { windowManager } from './window-manager';
 import { IPCChannel } from 'csdm/common/ipc-channel';
 
-autoUpdater.logger = {
-  error: logger.error,
-  info: logger.log,
-  warn: logger.warn,
-  debug: logger.log,
-};
-autoUpdater.disableWebInstaller = true;
-autoUpdater.autoDownload = false;
+let autoUpdaterPromise: Promise<(typeof import('electron-updater'))['autoUpdater']> | undefined;
+
+async function getAutoUpdater() {
+  if (autoUpdaterPromise === undefined) {
+    autoUpdaterPromise = import('electron-updater').then(({ autoUpdater }) => {
+      autoUpdater.logger = {
+        error: logger.error,
+        info: logger.log,
+        warn: logger.warn,
+        debug: logger.log,
+      };
+      autoUpdater.disableWebInstaller = true;
+      autoUpdater.autoDownload = false;
+
+      return autoUpdater;
+    });
+  }
+
+  return await autoUpdaterPromise;
+}
 
 export async function initialize(autoDownloadUpdates: boolean) {
+  const autoUpdater = await getAutoUpdater();
   let lastDownloadedVersion: string | null = null;
   let isDownloading = false;
   let shouldDownloadUpdatesAutomatically = autoDownloadUpdates;

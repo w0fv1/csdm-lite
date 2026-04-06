@@ -11,7 +11,7 @@ const createIgnoredSteamAccountsTable: Migration = {
         col
           .notNull()
           .primaryKey()
-          .check(sql`length((steam_id)::text) > 0`),
+          .check(sql`length(steam_id) > 0`),
       )
       .execute();
   },

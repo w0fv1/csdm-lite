@@ -1,6 +1,7 @@
 import type { Demo } from 'csdm/common/types/demo';
 import type { DemoRow } from 'csdm/node/database/demos/demo-table';
 import type { ColumnID } from 'csdm/common/types/column-id';
+import { ensureDate } from '../ensure-date';
 
 export function demoRowToDemo(
   row: DemoRow & {
@@ -17,7 +18,7 @@ export function demoRowToDemo(
     name: row.name,
     source: row.source,
     type: row.type,
-    date: row.date.toISOString(),
+    date: ensureDate(row.date).toISOString(),
     networkProtocol: row.network_protocol,
     buildNumber: row.build_number,
     serverName: row.server_name,
@@ -28,7 +29,7 @@ export function demoRowToDemo(
     duration: row.duration,
     mapName: row.map_name,
     shareCode: row.share_code ?? '',
-    analyzeDate: row.analyzeDate ? row.analyzeDate.toISOString() : null,
+    analyzeDate: row.analyzeDate ? ensureDate(row.analyzeDate).toISOString() : null,
     comment: comment ?? '',
     tagIds: tagIds.map(String),
   };

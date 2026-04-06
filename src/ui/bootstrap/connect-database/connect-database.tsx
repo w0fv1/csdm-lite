@@ -1,20 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Plural, Trans } from '@lingui/react/macro';
 import { useDispatch } from 'csdm/ui/store/use-dispatch';
-import { PortInput } from 'csdm/ui/components/inputs/port-input';
-import { DatabaseNameInput } from 'csdm/ui/components/inputs/database-name-input';
-import { UsernameInput } from 'csdm/ui/components/inputs/username-input';
-import { PasswordInput } from 'csdm/ui/components/inputs/password-input';
 import { ConnectDatabaseButton } from 'csdm/ui/bootstrap/connect-database/connect-database-button';
 import { HelpLink } from './help-link';
-import type { DatabaseSettings } from 'csdm/node/settings/settings';
 import { useWebSocketClient } from 'csdm/ui/hooks/use-web-socket-client';
 import { useDatabaseSettings } from 'csdm/ui/settings/database/use-database-settings';
-import { useUpdateSettings } from 'csdm/ui/settings/use-update-settings';
 import { AppWrapper } from '../app-wrapper';
 import { AppContent } from '../app-content';
 import { connectDatabaseError, connectDatabaseSuccess } from '../bootstrap-actions';
-import { HostnameInput } from 'csdm/ui/components/inputs/hostname-input';
 import { RendererClientMessageName } from 'csdm/server/renderer-client-message-name';
 import { useBootstrapState } from '../use-bootstrap-state';
 import type { ConnectDatabaseError } from 'csdm/server/handlers/renderer-process/database/connect-database-handler';
@@ -25,19 +18,20 @@ import { CancelButton } from 'csdm/ui/components/buttons/cancel-button';
 import { ErrorMessage } from 'csdm/ui/components/error-message';
 import { ButtonVariant } from 'csdm/ui/components/buttons/button';
 import { ResetDatabaseButton } from 'csdm/ui/settings/database/reset-database-button';
+import { TextInput } from 'csdm/ui/components/inputs/text-input';
 
 function DatabaseSchemaVersionMismatch() {
   return (
     <div>
       <p>
         <Trans>
-          It looks like you installed an older version of CS Demo Manager and the current database schema is not
+          It looks like you installed an older version of CS Demo Manager Lite and the current database schema is not
           compatible with it.
         </Trans>
       </p>
       <p>
         <Trans>
-          You can either update CS Demo Manager to the latest version or reset the database to start from scratch.
+          You can either update CS Demo Manager Lite to the latest version or reset the database to start from scratch.
         </Trans>
       </p>
 
@@ -50,21 +44,6 @@ function DatabaseSchemaVersionMismatch() {
 
 function getHintFromError({ code, message }: ConnectDatabaseError) {
   switch (code) {
-    case ErrorCode.PsqlNotFound:
-      return (
-        <p>
-          <Trans>
-            It usually means that PostgreSQL is not installed on your system or the path to the <strong>psql</strong>{' '}
-            executable is not in your <strong>PATH</strong> environment variable.
-          </Trans>
-        </p>
-      );
-    case ErrorCode.PsqlTimeout:
-      return (
-        <p>
-          <Trans>It usually means that the PostgreSQL service is not running, make sure it's running.</Trans>
-        </p>
-      );
     case ErrorCode.DatabaseSchemaVersionMismatch:
       return <DatabaseSchemaVersionMismatch />;
   }
@@ -73,7 +52,7 @@ function getHintFromError({ code, message }: ConnectDatabaseError) {
     return (
       <p>
         <Trans>
-          This error usually means that the database is not running or that the connection settings are incorrect.
+          This error usually means that the local database could not be opened yet.
         </Trans>
       </p>
     );
@@ -81,7 +60,7 @@ function getHintFromError({ code, message }: ConnectDatabaseError) {
 
   return (
     <p>
-      <Trans>Make sure PostgreSQL is running and your settings are correct.</Trans>
+      <Trans>Make sure the SQLite database file is accessible and your settings are correct.</Trans>
     </p>
   );
 }
@@ -89,10 +68,8 @@ function getHintFromError({ code, message }: ConnectDatabaseError) {
 export function ConnectDatabase() {
   const client = useWebSocketClient();
   const dispatch = useDispatch();
-  const currentDatabaseSettings: DatabaseSettings = useDatabaseSettings();
-  const updateSettings = useUpdateSettings();
+  const { filePath } = useDatabaseSettings();
   const { error } = useBootstrapState();
-  const [databaseSettings, setDatabaseSettings] = useState<DatabaseSettings>(currentDatabaseSettings);
   const [isConnecting, setIsConnecting] = useState(false);
   const [secondsBeforeNextTry, setSecondsBeforeNextTry] = useState(-1);
   const animationId = useRef<number | null>(null);
@@ -110,20 +87,17 @@ export function ConnectDatabase() {
     setIsConnecting(true);
     const error = await client.send({
       name: RendererClientMessageName.ConnectDatabase,
-      payload: databaseSettings,
+      payload: undefined,
     });
     if (error) {
       setIsConnecting(false);
       dispatch(connectDatabaseError({ error }));
     } else {
-      await updateSettings({
-        database: databaseSettings,
-      });
       dispatch(connectDatabaseSuccess());
     }
 
     return error;
-  }, [client, databaseSettings, dispatch, updateSettings]);
+  }, [client, dispatch]);
 
   useEffect(() => {
     const onKeyDown = async (event: KeyboardEvent) => {
@@ -181,7 +155,7 @@ export function ConnectDatabase() {
     const hint = getHintFromError(error);
     return (
       <div className="m-auto mt-8 flex max-w-[600px] flex-col">
-        <ErrorMessage message={<Trans>The connection to the database failed with the following error:</Trans>} />
+        <ErrorMessage message={<Trans>Opening the local database failed with the following error:</Trans>} />
         <p className="my-8 text-body-strong select-text">{error.message}</p>
         {hint}
       </div>
@@ -195,65 +169,12 @@ export function ConnectDatabase() {
           <div className="m-auto flex w-[400px] flex-col">
             <div>
               <p>
-                <Trans>CS Demo Manager requires a PostgreSQL database.</Trans>
+                <Trans>CS Demo Manager Lite opens its local SQLite database automatically.</Trans>
               </p>
               <HelpLink />
             </div>
             <div className="mt-12 flex flex-col gap-12">
-              <div className="flex gap-x-8">
-                <div className="w-full">
-                  <HostnameInput
-                    hostname={databaseSettings.hostname}
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                      setDatabaseSettings({
-                        ...databaseSettings,
-                        hostname: event.target.value,
-                      });
-                    }}
-                    isDisabled={isConnecting}
-                  />
-                </div>
-                <PortInput
-                  port={databaseSettings.port}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    setDatabaseSettings({
-                      ...databaseSettings,
-                      port: +event.target.value,
-                    });
-                  }}
-                  isDisabled={isConnecting}
-                />
-              </div>
-              <DatabaseNameInput
-                databaseName={databaseSettings.database}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setDatabaseSettings({
-                    ...databaseSettings,
-                    database: event.target.value,
-                  });
-                }}
-                isDisabled={isConnecting}
-              />
-              <UsernameInput
-                username={databaseSettings.username}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setDatabaseSettings({
-                    ...databaseSettings,
-                    username: event.target.value,
-                  });
-                }}
-                isDisabled={isConnecting}
-              />
-              <PasswordInput
-                password={databaseSettings.password}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setDatabaseSettings({
-                    ...databaseSettings,
-                    password: event.target.value,
-                  });
-                }}
-                isDisabled={isConnecting}
-              />
+              <TextInput label={<Trans>Database file</Trans>} value={filePath} isReadOnly={true} />
               <div className="flex items-center justify-between">
                 <ConnectDatabaseButton isLoading={isConnecting} onClick={connectDatabase} />
                 {secondsBeforeNextTry > 0 && (

@@ -3,6 +3,7 @@ import { db } from 'csdm/node/database/database';
 import type { SearchFilter } from 'csdm/common/types/search/search-filter';
 import type { RoundResult } from 'csdm/common/types/search/round-result';
 import { roundRowToRound } from '../rounds/round-row-to-round';
+import { ensureDate } from '../ensure-date';
 
 type Filter = SearchFilter;
 
@@ -47,16 +48,12 @@ export async function searchRounds({
 
       return roundTagsQuery;
     })
-    .select(
-      sql<string[] | null>`ARRAY_AGG(DISTINCT round_tags.tag_id) FILTER (WHERE round_tags.tag_id IS NOT NULL)`.as(
-        'tagIds',
-      ),
-    )
+    .select('round_tags.tag_id as tagId')
     .$if(matchTagIds.length > 0, (qb) => {
       return qb
         .leftJoin('checksum_tags', 'checksum_tags.checksum', 'matches.checksum')
         .where('checksum_tags.tag_id', 'in', matchTagIds)
-        .groupBy('checksum_tags.tag_id');
+        .groupBy(['rounds.id', 'demos.map_name', 'demos.date', 'matches.demo_path', 'demos.game', 'rc.comment', 'round_tags.tag_id']);
     })
     .$if(steamIds.length > 0, (qb) => {
       return qb
@@ -67,7 +64,7 @@ export async function searchRounds({
     .orderBy('rounds.match_checksum')
     .orderBy('rounds.number')
     .orderBy('rounds.start_tick')
-    .groupBy(['rounds.id', 'demos.map_name', 'demos.date', 'matches.demo_path', 'demos.game', 'rc.comment']);
+    .groupBy(['rounds.id', 'demos.map_name', 'demos.date', 'matches.demo_path', 'demos.game', 'rc.comment', 'round_tags.tag_id']);
 
   if (mapNames.length > 0) {
     query = query.where('demos.map_name', 'in', mapNames);
@@ -82,17 +79,31 @@ export async function searchRounds({
   }
 
   const rows = await query.execute();
+  const roundsById = new Map<string, RoundResult>();
+  for (const row of rows) {
+    const roundId = String(row.id);
+    const existingRound = roundsById.get(roundId);
+    if (existingRound) {
+      if (row.tagId !== null) {
+        const tagId = String(row.tagId);
+        if (!existingRound.tagIds.includes(tagId)) {
+          existingRound.tagIds.push(tagId);
+        }
+      }
+      continue;
+    }
 
-  const rounds: RoundResult[] = rows.map((row) => {
-    return {
-      ...roundRowToRound(row, row.tagIds ?? []),
+    roundsById.set(roundId, {
+      ...roundRowToRound(row, row.tagId === null ? [] : [String(row.tagId)]),
       mapName: row.map_name,
-      date: row.date.toISOString(),
+      date: ensureDate(row.date).toISOString(),
       demoPath: row.demo_path,
       game: row.game,
       comment: row.comment ?? '',
-    };
-  });
+    });
+  }
+
+  const rounds = [...roundsById.values()];
 
   return rounds;
 }

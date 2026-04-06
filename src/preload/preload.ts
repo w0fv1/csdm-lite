@@ -45,6 +45,27 @@ import { readImageFile } from 'csdm/node/filesystem/image';
 import { writeJsonFile } from 'csdm/node/filesystem/write-json-file';
 import { ErrorCode } from 'csdm/common/error-code';
 
+const preloadLogger = {
+  debug: (...data: unknown[]) => {
+    logger.debug(...data);
+  },
+  log: (...data: unknown[]) => {
+    logger.log(...data);
+  },
+  warn: (...data: unknown[]) => {
+    logger.warn(...data);
+  },
+  error: (...data: unknown[]) => {
+    logger.error(...data);
+  },
+  getLogFilePath: () => {
+    return logger.getLogFilePath();
+  },
+  clear: async () => {
+    await logger.clear();
+  },
+};
+
 window.addEventListener('error', onWindowError);
 window.addEventListener('unhandledrejection', (error) => {
   logger.error(error.reason);
@@ -59,7 +80,7 @@ function handleError(error: unknown) {
 }
 
 const api: PreloadApi = {
-  logger,
+  logger: preloadLogger,
   ADDITIONAL_ARGUMENTS: process.argv,
   IMAGES_FOLDER_PATH: path.join(getStaticFolderPath(), 'images'),
   getAppInformation,

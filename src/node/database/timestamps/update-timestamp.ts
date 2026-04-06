@@ -5,7 +5,7 @@ import type { TimestampName } from './timestamp-name';
 export async function updateTimestamp(timestampName: TimestampName) {
   await db
     .insertInto('timestamps')
-    .values({ name: timestampName, date: sql`now()` })
+    .values({ name: timestampName, date: sql`CURRENT_TIMESTAMP` })
     .onConflict((oc) => {
       return oc.column('name').doUpdateSet({
         date: (b) => b.ref('excluded.date'),

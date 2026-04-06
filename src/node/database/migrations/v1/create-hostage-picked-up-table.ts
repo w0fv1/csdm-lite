@@ -6,7 +6,7 @@ const createHostagePickedUpTable: Migration = {
     await transaction.schema
       .createTable('hostage_picked_up')
       .ifNotExists()
-      .addColumn('id', 'bigserial', (col) => col.primaryKey().notNull())
+      .addColumn('id', 'integer', (col) => col.primaryKey().notNull())
       .addColumn('match_checksum', 'varchar', (col) => col.notNull())
       .addForeignKeyConstraint(
         'hostage_picked_up_match_checksum_fk',

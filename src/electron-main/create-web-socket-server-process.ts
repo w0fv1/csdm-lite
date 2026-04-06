@@ -1,10 +1,10 @@
-import path from 'node:path';
 import type { ChildProcess } from 'node:child_process';
 import { fork } from 'node:child_process';
 import { app } from 'electron';
+import { getAppResourcePath } from './get-app-resource-path';
 
 export function createWebSocketServerProcess() {
-  const serverFilePath = path.join(app.getAppPath(), 'server.js');
+  const serverFilePath = getAppResourcePath('server.js');
   const serverProcess: ChildProcess = fork(serverFilePath, {
     silent: true, // pipe back all outputs to the main process to log possible fork() errors
     env: process.env, // Inject all variables created from the main Electron process to make them accessible from the server process.

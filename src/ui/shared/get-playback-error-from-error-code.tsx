@@ -4,6 +4,7 @@ import { ErrorCode } from 'csdm/common/error-code';
 import { ExternalLink } from 'csdm/ui/components/external-link';
 import { Game } from 'csdm/common/types/counter-strike';
 import { HlaeError } from 'csdm/ui/components/messages/hlae-error';
+import { getApplicationGuideUrl } from 'csdm/common/urls';
 
 export function getPlaybackErrorMessageFromErrorCode(errorCode: ErrorCode, game?: Game) {
   switch (errorCode) {
@@ -30,7 +31,7 @@ export function getPlaybackErrorMessageFromErrorCode(errorCode: ErrorCode, game?
           <p>
             <Trans>
               You have to move the demo in a folder that contains only Basic Latin characters - see{' '}
-              <ExternalLink href="https://cs-demo-manager.com/docs/guides/playback#cs2-demo-playback-doesnt-start-or-crashes">
+              <ExternalLink href={getApplicationGuideUrl('cs2-demo-playback-does-not-start-or-crashes')}>
                 this documentation
               </ExternalLink>{' '}
               for details.
@@ -75,8 +76,7 @@ export function getPlaybackErrorMessageFromErrorCode(errorCode: ErrorCode, game?
           )}
           <p>
             <Trans>
-              Read the{' '}
-              <ExternalLink href="https://cs-demo-manager.com/docs/guides/playback">documentation</ExternalLink> for
+              Read the <ExternalLink href={getApplicationGuideUrl('playback')}>documentation</ExternalLink> for
               more information.
             </Trans>
           </p>
@@ -159,7 +159,7 @@ export function getPlaybackErrorMessageFromErrorCode(errorCode: ErrorCode, game?
         <p>
           <Trans>
             The game crashed, please see{' '}
-            <ExternalLink href="https://cs-demo-manager.com/docs/guides/playback#cs2-demo-playback-doesnt-start-or-crashes">
+            <ExternalLink href={getApplicationGuideUrl('cs2-demo-playback-does-not-start-or-crashes')}>
               this documentation
             </ExternalLink>{' '}
             for help.

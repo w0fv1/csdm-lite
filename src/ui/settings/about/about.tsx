@@ -49,7 +49,7 @@ export function About() {
   return (
     <SettingsView>
       <div className="flex flex-col gap-y-20">
-        <h2 className="text-title">CS Demo Manager</h2>
+        <h2 className="text-title">CS Demo Manager Lite</h2>
 
         <section className="flex flex-col gap-y-8">
           <SettingsEntry
