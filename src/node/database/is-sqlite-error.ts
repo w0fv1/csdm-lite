@@ -2,7 +2,7 @@ type SqliteLikeError = Error & {
   code?: string;
 };
 
-export function isSqliteError(error: unknown): error is SqliteLikeError {
+function isSqliteError(error: unknown): error is SqliteLikeError {
   return error instanceof Error && typeof (error as SqliteLikeError).code === 'string';
 }
 
