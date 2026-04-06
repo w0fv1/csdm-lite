@@ -45,9 +45,40 @@ jobs:
             echo "macos_signing_enabled=false" >> "$GITHUB_OUTPUT"
           fi
 
+  reset-release:
+    name: Remove existing release for current tag
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Delete existing GitHub release for the current tag
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const tag = context.ref.replace('refs/tags/', '');
+
+            try {
+              const { data: release } = await github.rest.repos.getReleaseByTag({
+                ...context.repo,
+                tag,
+              });
+              await github.rest.repos.deleteRelease({
+                ...context.repo,
+                release_id: release.id,
+              });
+              core.info(`Deleted existing release for tag ${tag}.`);
+            } catch (error) {
+              if (error.status === 404) {
+                core.info(`No existing release found for tag ${tag}.`);
+                return;
+              }
+
+              throw error;
+            }
+
   build-macos:
     name: Build macOS
-    needs: release-configuration
+    needs: [release-configuration, reset-release]
     runs-on: macos-latest
 
     steps:
@@ -104,7 +135,7 @@ jobs:
 
   build-linux:
     name: Build Linux
-    needs: release-configuration
+    needs: [release-configuration, reset-release]
     runs-on: ubuntu-latest
 
     steps:
@@ -139,7 +170,7 @@ jobs:
 
   build-windows:
     name: Build Windows installer and portable
-    needs: release-configuration
+    needs: [release-configuration, reset-release]
     runs-on: windows-latest
 
     steps:
