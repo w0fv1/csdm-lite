@@ -30,7 +30,6 @@ const config = {
   productName: 'CS Demo Manager Lite',
   publish: {
     provider: 'github',
-    releaseType: 'release',
   },
   releaseInfo: {
     releaseName: `v${pkg.version}`,
