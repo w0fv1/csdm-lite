@@ -25,9 +25,7 @@ export async function fetchPlayerChartsData(steamId: string, filters: MatchFilte
         SUM(CASE WHEN clutches.won = 1 THEN 1 ELSE 0 END) * 100.0 /
         CASE WHEN COUNT(clutches.id) > 0 THEN COUNT(clutches.id) ELSE 1 END,
         1
-      )`.as(
-        'clutchWonPercentage',
-      ),
+      )`.as('clutchWonPercentage'),
     ])
     .where('steam_id', '=', steamId)
     .groupBy(['headshotPercentage', 'averageDamagePerRound', 'killDeathRatio', 'demos.date'])

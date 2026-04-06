@@ -42,6 +42,9 @@ jobs:
         with:
           cache: true
 
+      - name: Build local linter rules
+        run: node ./scripts/build-linter-rules.mjs
+
       - name: Lint
         run: npm run lint
 
@@ -67,6 +70,9 @@ jobs:
       - uses: voidzero-dev/setup-vp@v1
         with:
           cache: true
+
+      - name: Rebuild better-sqlite3 for the current Node.js runtime
+        run: npm rebuild better-sqlite3
 
       - name: Test
         run: npm run test

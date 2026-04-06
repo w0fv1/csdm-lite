@@ -76,8 +76,8 @@ export function getPlaybackErrorMessageFromErrorCode(errorCode: ErrorCode, game?
           )}
           <p>
             <Trans>
-              Read the <ExternalLink href={getApplicationGuideUrl('playback')}>documentation</ExternalLink> for
-              more information.
+              Read the <ExternalLink href={getApplicationGuideUrl('playback')}>documentation</ExternalLink> for more
+              information.
             </Trans>
           </p>
         </div>

@@ -1,4 +1,3 @@
-import path from 'node:path';
 import { BrowserWindow, app, shell } from 'electron';
 import windowStateKeeper from 'electron-window-state';
 import { IPCChannel } from 'csdm/common/ipc-channel';

@@ -1,4 +1,4 @@
-import type BetterSqlite3 from 'better-sqlite3';
+import BetterSqlite3 from 'better-sqlite3';
 import type { KyselyConfig, LogEvent, Logger } from 'kysely';
 import { Kysely, SqliteDialect } from 'kysely';
 import type { DatabaseSettings } from 'csdm/node/settings/settings';
@@ -14,7 +14,12 @@ function isDateColumnType(type: string | null | undefined) {
   }
 
   const normalizedType = type.toLowerCase();
-  return normalizedType === 'date' || normalizedType === 'datetime' || normalizedType === 'timestamp' || normalizedType === 'timestamptz';
+  return (
+    normalizedType === 'date' ||
+    normalizedType === 'datetime' ||
+    normalizedType === 'timestamp' ||
+    normalizedType === 'timestamptz'
+  );
 }
 
 function normalizeSqliteResultValue(value: unknown, type: string | null | undefined) {
@@ -26,8 +31,8 @@ function normalizeSqliteResultValue(value: unknown, type: string | null | undefi
     return value === 1 || value === true;
   }
 
-  if (isDateColumnType(type) && !(value instanceof Date)) {
-    const date = new Date(String(value));
+  if (isDateColumnType(type) && !(value instanceof Date) && (typeof value === 'string' || typeof value === 'number')) {
+    const date = new Date(value);
     if (!Number.isNaN(date.getTime())) {
       return date;
     }
@@ -112,7 +117,6 @@ export function getSqliteDatabase() {
 }
 
 export function createDatabaseConnection(settings: DatabaseSettings) {
-  const BetterSqlite3 = require('better-sqlite3') as typeof import('better-sqlite3');
   const logger = globalThis.logger ?? console;
   try {
     sqliteDatabase?.close();

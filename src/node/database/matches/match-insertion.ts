@@ -33,16 +33,15 @@ type InsertFromCsvOptions<Table> = {
   columns: Array<keyof Table>;
 };
 
-export async function insertFromCsv<Table>({
-  columns,
-  csvFilePath,
-  tableName,
-}: InsertFromCsvOptions<Table>) {
+export async function insertFromCsv<Table>({ columns, csvFilePath, tableName }: InsertFromCsvOptions<Table>) {
   const sqlite = getSqliteDatabase();
   const columnNames = columns.map((column) => `"${String(column)}"`).join(', ');
   const placeholders = columns.map(() => '?').join(', ');
   const statement = sqlite.prepare(`INSERT INTO "${String(tableName)}" (${columnNames}) VALUES (${placeholders})`);
-  const tableInfo = sqlite.prepare(`PRAGMA table_info("${String(tableName)}")`).all() as Array<{ name: string; type: string }>;
+  const tableInfo = sqlite.prepare(`PRAGMA table_info("${String(tableName)}")`).all() as Array<{
+    name: string;
+    type: string;
+  }>;
   const columnTypes = columns.map((column) => {
     return tableInfo.find((info) => info.name === column)?.type.toLowerCase() ?? '';
   });

@@ -15,8 +15,8 @@ export function Donate() {
       </p>
       <p>
         <Trans>
-          The original project was created and maintained upstream, and this fork focuses on keeping a lightweight
-          local SQLite workflow available.
+          The original project was created and maintained upstream, and this fork focuses on keeping a lightweight local
+          SQLite workflow available.
         </Trans>
       </p>
       <p>

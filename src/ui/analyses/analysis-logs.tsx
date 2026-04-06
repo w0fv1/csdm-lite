@@ -116,17 +116,14 @@ export function AnalysisLogs() {
           <p>
             <Trans>
               Please read the error codes{' '}
-              <ExternalLink href={getApplicationGuideUrl('analysis-errors')}>documentation</ExternalLink>{' '}
-              to understand the code signification and what you can do.
+              <ExternalLink href={getApplicationGuideUrl('analysis-errors')}>documentation</ExternalLink> to understand
+              the code signification and what you can do.
             </Trans>
           </p>
           <p>
             <Trans>
-              Please read and follow the instructions on{' '}
-              <ExternalLink href={BUG_REPORT_URL}>
-                GitHub
-              </ExternalLink>{' '}
-              to report the issue <strong>only if the documentation says you should for this error code</strong>.
+              Please read and follow the instructions on <ExternalLink href={BUG_REPORT_URL}>GitHub</ExternalLink> to
+              report the issue <strong>only if the documentation says you should for this error code</strong>.
             </Trans>
           </p>
         </div>
@@ -135,9 +132,8 @@ export function AnalysisLogs() {
       message = (
         <p>
           <Trans>
-            Please read and follow the instructions on{' '}
-            <ExternalLink href={BUG_REPORT_URL}>GitHub</ExternalLink>{' '}
-            to report the issue.
+            Please read and follow the instructions on <ExternalLink href={BUG_REPORT_URL}>GitHub</ExternalLink> to
+            report the issue.
           </Trans>
         </p>
       );

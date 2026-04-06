@@ -54,7 +54,9 @@ export function AnalyzeConfirmationDialog({
             <p>
               <Trans>
                 Please see this{' '}
-                <ExternalLink href={getApplicationGuideUrl('the-demo-source-is-not-supported')}>documentation</ExternalLink>{' '}
+                <ExternalLink href={getApplicationGuideUrl('the-demo-source-is-not-supported')}>
+                  documentation
+                </ExternalLink>{' '}
                 for details.
               </Trans>
             </p>

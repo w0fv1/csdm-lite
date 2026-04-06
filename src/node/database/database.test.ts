@@ -19,7 +19,7 @@ describe('SQLite database wrapper', () => {
   });
 
   afterEach(async () => {
-    await db.destroy();
+    await db?.destroy();
     await fs.rm(tempFolderPath, { recursive: true, force: true });
   });
 
@@ -31,17 +31,16 @@ describe('SQLite database wrapper', () => {
         has_vac_live_ban boolean NOT NULL
       );
     `);
-    sqliteDatabase.prepare(`
+    sqliteDatabase
+      .prepare(`
       INSERT INTO matches (
         is_ranked,
         has_vac_live_ban
       ) VALUES (?, ?)
-    `).run(1, 0);
+    `)
+      .run(1, 0);
 
-    const match = await db
-      .selectFrom('matches')
-      .select(['is_ranked', 'has_vac_live_ban'])
-      .executeTakeFirstOrThrow();
+    const match = await db.selectFrom('matches').select(['is_ranked', 'has_vac_live_ban']).executeTakeFirstOrThrow();
 
     expect(match.is_ranked).toBe(true);
     expect(typeof match.is_ranked).toBe('boolean');
@@ -56,11 +55,13 @@ describe('SQLite database wrapper', () => {
         date timestamptz NOT NULL
       );
     `);
-    sqliteDatabase.prepare(`
+    sqliteDatabase
+      .prepare(`
       INSERT INTO demos (
         date
       ) VALUES (?)
-    `).run('2026-04-04T15:39:56.000Z');
+    `)
+      .run('2026-04-04T15:39:56.000Z');
 
     const demo = await db.selectFrom('demos').select(['date']).executeTakeFirstOrThrow();
 

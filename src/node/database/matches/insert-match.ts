@@ -1062,7 +1062,6 @@ export async function insertMatch({ checksum, demoPath, outputFolderPath }: Inse
   } catch (error) {
     // The import mixes file I/O and DB writes, so the higher-level orchestration stays outside a single transaction.
     // Mimic a rollback in case of error by deleting the match we were trying to insert.
-    console.error(error);
     logger.error('Error while inserting match');
     logger.error(error);
 

@@ -82,6 +82,7 @@ export function ChangelogDialog() {
         logger.log('Failed to fetch changelog');
         logger.error(error);
         try {
+          /* oxlint-disable lingui/no-unlocalized-strings */
           const fallbackMarkdown = [
             '# Release notes',
             '',
@@ -93,6 +94,7 @@ export function ChangelogDialog() {
             '',
             'If release notes are not available yet, the current build may not have been published on GitHub Releases.',
           ].join('\n');
+          /* oxlint-enable lingui/no-unlocalized-strings */
           setHtml(await markdownToHtml(fallbackMarkdown));
           setStatus(Status.Success);
         } catch (fallbackError) {

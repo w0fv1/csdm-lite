@@ -157,9 +157,8 @@ function AudioSelectorDialog({ loadAudioFile }: Props) {
 
               <p className="mt-8">
                 <Trans>
-                  See the{' '}
-                  <ExternalLink href={getApplicationGuideUrl('audio-playback')}>documentation</ExternalLink>{' '}
-                  for more information.
+                  See the <ExternalLink href={getApplicationGuideUrl('audio-playback')}>documentation</ExternalLink> for
+                  more information.
                 </Trans>
               </p>
             </div>

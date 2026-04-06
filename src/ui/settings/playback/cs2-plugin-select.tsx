@@ -129,8 +129,8 @@ export function Cs2PluginSelect() {
             <p>
               <Trans>
                 See the{' '}
-                <ExternalLink href={getApplicationGuideUrl('cs2-plugin-compatibility')}>documentation</ExternalLink>{' '}
-                for more information.
+                <ExternalLink href={getApplicationGuideUrl('cs2-plugin-compatibility')}>documentation</ExternalLink> for
+                more information.
               </Trans>
             </p>
           </div>

@@ -9,6 +9,7 @@ const v13: Migration = {
       filePath: settings.database.filePath ?? getDatabaseFilePath(),
     };
 
+    await Promise.resolve();
     return settings;
   },
 };

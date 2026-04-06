@@ -10,7 +10,27 @@ on:
   workflow_dispatch:
 
 jobs:
+  check-crowdin-configuration:
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+
+    steps:
+      - name: Check Crowdin secrets
+        id: check
+        env:
+          CROWDIN_GH_TOKEN: ${{ secrets.CROWDIN_GH_TOKEN }}
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+        run: |
+          if [ -n "$CROWDIN_GH_TOKEN" ] && [ -n "$CROWDIN_PERSONAL_TOKEN" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          fi
+
   upload-translations-to-crowdin:
+    needs: check-crowdin-configuration
+    if: needs.check-crowdin-configuration.outputs.enabled == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -28,3 +48,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.CROWDIN_GH_TOKEN }}
           CROWDIN_PROJECT_ID: '631068'
           CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+
+  crowdin-not-configured:
+    needs: check-crowdin-configuration
+    if: needs.check-crowdin-configuration.outputs.enabled != 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Skip optional Crowdin upload
+        run: echo "Crowdin secrets are not configured. Skipping translation upload."

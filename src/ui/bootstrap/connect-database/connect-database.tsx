@@ -51,9 +51,7 @@ function getHintFromError({ code, message }: ConnectDatabaseError) {
   if (message.includes('ECONNREFUSED')) {
     return (
       <p>
-        <Trans>
-          This error usually means that the local database could not be opened yet.
-        </Trans>
+        <Trans>This error usually means that the local database could not be opened yet.</Trans>
       </p>
     );
   }

@@ -92,7 +92,12 @@ export async function ensureElectronSqliteBinding(rootFolderPath) {
   delete env.ELECTRON_RUN_AS_NODE;
   delete env.CSDM_SQLITE_NATIVE_BINDING_PATH;
 
-  await run(npxBinaryName, ['@electron/rebuild', '-f', '-w', 'better-sqlite3', '-v', expectedMetadata.electronVersion], rootFolderPath, env);
+  await run(
+    npxBinaryName,
+    ['@electron/rebuild', '-f', '-w', 'better-sqlite3', '-v', expectedMetadata.electronVersion],
+    rootFolderPath,
+    env,
+  );
 
   if (!fs.existsSync(nodeModulesBindingPath)) {
     throw new Error(`Could not find better-sqlite3 binding at ${nodeModulesBindingPath}`);

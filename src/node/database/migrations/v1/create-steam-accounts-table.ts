@@ -51,14 +51,12 @@ const createSteamAccountsTable: Migration = {
       .as(
         transaction
           .with('match_steam_ids_with_date', (qb) => {
-            return (
-              qb
-                .selectFrom('matches')
-                .innerJoin('demos', 'demos.checksum', 'matches.checksum')
-                .select(['matches.checksum', 'demos.date as match_date'])
-                .leftJoin('players', 'matches.checksum', 'players.match_checksum')
-                .select(['players.steam_id'])
-            );
+            return qb
+              .selectFrom('matches')
+              .innerJoin('demos', 'demos.checksum', 'matches.checksum')
+              .select(['matches.checksum', 'demos.date as match_date'])
+              .leftJoin('players', 'matches.checksum', 'players.match_checksum')
+              .select(['players.steam_id']);
           })
           .selectFrom('match_steam_ids_with_date')
           .select([

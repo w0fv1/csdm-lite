@@ -1,3 +1,4 @@
+/* eslint-disable lingui/no-unlocalized-strings, @typescript-eslint/no-require-imports, no-console */
 'use strict';
 
 if (process.env.ELECTRON_RUN_AS_NODE === '1') {

@@ -1,4 +1,5 @@
 globalThis.logger = window.csdm.logger;
+// oxlint-disable-next-line lingui/no-unlocalized-strings
 document.title = 'CS Demo Manager Lite';
 import React, { type ErrorInfo } from 'react';
 import ReactDOM from 'react-dom/client';

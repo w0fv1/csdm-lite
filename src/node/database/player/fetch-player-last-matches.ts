@@ -1,4 +1,3 @@
-import { sql } from 'kysely';
 import { TeamLetter } from 'csdm/common/types/counter-strike';
 import type { LastMatch } from 'csdm/common/types/last-match';
 import { db } from 'csdm/node/database/database';

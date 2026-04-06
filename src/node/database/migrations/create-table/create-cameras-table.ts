@@ -1,12 +1,12 @@
-import { sql, type Transaction } from 'kysely';
+import type { Transaction } from 'kysely';
 import type { Database } from '../../schema';
 
 export async function createCamerasTable(transaction: Transaction<Database>) {
-    await transaction.schema
-      .createTable('cameras')
-      .ifNotExists()
-      .addColumn('id', 'text', (col) => col.primaryKey().notNull())
-      .addColumn('game', 'varchar', (col) => col.notNull())
+  await transaction.schema
+    .createTable('cameras')
+    .ifNotExists()
+    .addColumn('id', 'text', (col) => col.primaryKey().notNull())
+    .addColumn('game', 'varchar', (col) => col.notNull())
     .addColumn('name', 'text', (col) => col.notNull())
     .addColumn('map_name', 'varchar', (col) => col.notNull())
     .addColumn('x', 'float8', (col) => col.notNull())

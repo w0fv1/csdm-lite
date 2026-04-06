@@ -9,10 +9,7 @@ export async function searchPlayers({ steamIdOrName, ignoredSteamIds }: PlayersF
     .selectFrom('players')
     .select(['players.steam_id', 'players.name'])
     .where(({ eb, or }) => {
-      return or([
-        eb('players.steam_id', '=', steamIdOrName),
-        sql<boolean>`LOWER(players.name) LIKE ${likePattern}`,
-      ]);
+      return or([eb('players.steam_id', '=', steamIdOrName), sql<boolean>`LOWER(players.name) LIKE ${likePattern}`]);
     })
     .orderBy('players.steam_id')
     .orderBy('players.name');

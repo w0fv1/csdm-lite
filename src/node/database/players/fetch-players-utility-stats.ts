@@ -101,9 +101,7 @@ async function fetchPlayersAverageEnemiesFlashed(steamIds: string[], filters?: M
     })
     .selectFrom(['enemies_flashed'])
     .select('enemies_flashed.flasher_steam_id as steamId')
-    .select(() => [
-      sql<number>`ROUND((flashed_count * 1.0) / NULLIF(total_count, 0), 1)`.as('average_enemies_flashed'),
-    ])
+    .select(() => [sql<number>`ROUND((flashed_count * 1.0) / NULLIF(total_count, 0), 1)`.as('average_enemies_flashed')])
     .leftJoin('flashbangs_thrown', 'flashbangs_thrown.player_steam_id', 'enemies_flashed.flasher_steam_id')
     .orderBy('steamId');
 
@@ -153,9 +151,7 @@ async function fetchPlayersAverageHeGrenadeDamage(steamIds: string[], filters?: 
     })
     .selectFrom(['he_grenades_damages_done'])
     .select('he_grenades_damages_done.attacker_steam_id as steamId')
-    .select(
-      sql<number>`ROUND((total_health_damage * 1.0) / NULLIF(total_count, 0), 1)`.as('average_damage'),
-    )
+    .select(sql<number>`ROUND((total_health_damage * 1.0) / NULLIF(total_count, 0), 1)`.as('average_damage'))
     .leftJoin('he_grenades_thrown', 'he_grenades_thrown.player_steam_id', 'he_grenades_damages_done.attacker_steam_id')
     .orderBy('steamId');
 

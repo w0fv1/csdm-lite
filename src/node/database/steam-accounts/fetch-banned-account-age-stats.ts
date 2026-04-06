@@ -16,9 +16,7 @@ export async function fetchBannedAccountAgeStats(ignoreBanBeforeFirstSeen: boole
   }
 
   const rows = await query.execute();
-  const timestamps = rows
-    .map((row) => ensureDate(row.creationDate).getTime())
-    .sort((left, right) => left - right);
+  const timestamps = rows.map((row) => ensureDate(row.creationDate).getTime()).sort((left, right) => left - right);
 
   if (timestamps.length === 0) {
     return {
@@ -30,9 +28,7 @@ export async function fetchBannedAccountAgeStats(ignoreBanBeforeFirstSeen: boole
   const averageTimestamp = timestamps.reduce((sum, timestamp) => sum + timestamp, 0) / timestamps.length;
   const middleIndex = Math.floor(timestamps.length / 2);
   const medianTimestamp =
-    timestamps.length % 2 === 0
-      ? (timestamps[middleIndex - 1] + timestamps[middleIndex]) / 2
-      : timestamps[middleIndex];
+    timestamps.length % 2 === 0 ? (timestamps[middleIndex - 1] + timestamps[middleIndex]) / 2 : timestamps[middleIndex];
 
   return {
     average: new Date(averageTimestamp).toISOString(),

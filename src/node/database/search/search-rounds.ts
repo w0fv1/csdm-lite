@@ -53,7 +53,15 @@ export async function searchRounds({
       return qb
         .leftJoin('checksum_tags', 'checksum_tags.checksum', 'matches.checksum')
         .where('checksum_tags.tag_id', 'in', matchTagIds)
-        .groupBy(['rounds.id', 'demos.map_name', 'demos.date', 'matches.demo_path', 'demos.game', 'rc.comment', 'round_tags.tag_id']);
+        .groupBy([
+          'rounds.id',
+          'demos.map_name',
+          'demos.date',
+          'matches.demo_path',
+          'demos.game',
+          'rc.comment',
+          'round_tags.tag_id',
+        ]);
     })
     .$if(steamIds.length > 0, (qb) => {
       return qb
@@ -64,7 +72,15 @@ export async function searchRounds({
     .orderBy('rounds.match_checksum')
     .orderBy('rounds.number')
     .orderBy('rounds.start_tick')
-    .groupBy(['rounds.id', 'demos.map_name', 'demos.date', 'matches.demo_path', 'demos.game', 'rc.comment', 'round_tags.tag_id']);
+    .groupBy([
+      'rounds.id',
+      'demos.map_name',
+      'demos.date',
+      'matches.demo_path',
+      'demos.game',
+      'rc.comment',
+      'round_tags.tag_id',
+    ]);
 
   if (mapNames.length > 0) {
     query = query.where('demos.map_name', 'in', mapNames);

@@ -198,7 +198,7 @@ describe('search database queries', () => {
   });
 
   afterEach(async () => {
-    await db.destroy();
+    await db?.destroy();
     try {
       getSqliteDatabase().close();
     } catch {
@@ -209,30 +209,36 @@ describe('search database queries', () => {
 
   it('should search players case-insensitively, deduplicate steam IDs and ignore excluded players', async () => {
     const sqliteDatabase = getSqliteDatabase();
-    sqliteDatabase.prepare(`
+    sqliteDatabase
+      .prepare(`
       INSERT INTO players (
         steam_id,
         name,
         match_checksum,
         team_name
       ) VALUES (?, ?, ?, ?)
-    `).run('steam-1', 'Alpha', 'match-1', 'Team A');
-    sqliteDatabase.prepare(`
+    `)
+      .run('steam-1', 'Alpha', 'match-1', 'Team A');
+    sqliteDatabase
+      .prepare(`
       INSERT INTO players (
         steam_id,
         name,
         match_checksum,
         team_name
       ) VALUES (?, ?, ?, ?)
-    `).run('steam-1', 'alpha newer', 'match-2', 'Team A');
-    sqliteDatabase.prepare(`
+    `)
+      .run('steam-1', 'alpha newer', 'match-2', 'Team A');
+    sqliteDatabase
+      .prepare(`
       INSERT INTO players (
         steam_id,
         name,
         match_checksum,
         team_name
       ) VALUES (?, ?, ?, ?)
-    `).run('steam-2', 'Bravo', 'match-1', 'Team B');
+    `)
+      .run('steam-2', 'Bravo', 'match-1', 'Team B');
 
     const players = await searchPlayers({
       steamIdOrName: 'ALPHA',
@@ -345,9 +351,60 @@ describe('search database queries', () => {
       null,
     );
 
-    insertMatch.run('demo-1', 'demo-1.dem', GameType.Classic, 0, GameMode.Competitive, 1, 1, 1, 1, 1, 'A', TeamNumber.CT, '2026-04-04T15:39:56.000Z', 0, 24, 0);
-    insertMatch.run('demo-2', 'demo-2.dem', GameType.Classic, 0, GameMode.Competitive, 1, 1, 1, 1, 1, 'A', TeamNumber.CT, '2026-04-05T15:39:56.000Z', 0, 24, 0);
-    insertMatch.run('demo-3', 'demo-3.dem', GameType.Classic, 0, GameMode.Competitive, 1, 1, 1, 1, 1, 'A', TeamNumber.CT, '2026-04-06T15:39:56.000Z', 0, 24, 0);
+    insertMatch.run(
+      'demo-1',
+      'demo-1.dem',
+      GameType.Classic,
+      0,
+      GameMode.Competitive,
+      1,
+      1,
+      1,
+      1,
+      1,
+      'A',
+      TeamNumber.CT,
+      '2026-04-04T15:39:56.000Z',
+      0,
+      24,
+      0,
+    );
+    insertMatch.run(
+      'demo-2',
+      'demo-2.dem',
+      GameType.Classic,
+      0,
+      GameMode.Competitive,
+      1,
+      1,
+      1,
+      1,
+      1,
+      'A',
+      TeamNumber.CT,
+      '2026-04-05T15:39:56.000Z',
+      0,
+      24,
+      0,
+    );
+    insertMatch.run(
+      'demo-3',
+      'demo-3.dem',
+      GameType.Classic,
+      0,
+      GameMode.Competitive,
+      1,
+      1,
+      1,
+      1,
+      1,
+      'A',
+      TeamNumber.CT,
+      '2026-04-06T15:39:56.000Z',
+      0,
+      24,
+      0,
+    );
 
     const maps = await searchMapNames({
       name: 'DUST',
@@ -359,7 +416,8 @@ describe('search database queries', () => {
 
   it('should aggregate round tags into a single round result and keep ISO dates', async () => {
     const sqliteDatabase = getSqliteDatabase();
-    sqliteDatabase.prepare(`
+    sqliteDatabase
+      .prepare(`
       INSERT INTO demos (
         checksum,
         name,
@@ -378,26 +436,28 @@ describe('search database queries', () => {
         map_name,
         share_code
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      'match-1',
-      'demo.dem',
-      Game.CS2,
-      DemoSource.Valve,
-      DemoType.GOTV,
-      '2026-04-04T15:39:56.000Z',
-      1,
-      1,
-      'server',
-      'client',
-      1000,
-      64,
-      64,
-      120,
-      'de_dust2',
-      null,
-    );
+    `)
+      .run(
+        'match-1',
+        'demo.dem',
+        Game.CS2,
+        DemoSource.Valve,
+        DemoType.GOTV,
+        '2026-04-04T15:39:56.000Z',
+        1,
+        1,
+        'server',
+        'client',
+        1000,
+        64,
+        64,
+        120,
+        'de_dust2',
+        null,
+      );
 
-    sqliteDatabase.prepare(`
+    sqliteDatabase
+      .prepare(`
       INSERT INTO matches (
         checksum,
         demo_path,
@@ -416,26 +476,28 @@ describe('search database queries', () => {
         max_rounds,
         has_vac_live_ban
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      'match-1',
-      'C:\\demo.dem',
-      GameType.Classic,
-      0,
-      GameMode.Competitive,
-      1,
-      10,
-      10,
-      10,
-      10,
-      'Team A',
-      TeamNumber.CT,
-      '2026-04-04T15:39:56.000Z',
-      0,
-      24,
-      0,
-    );
+    `)
+      .run(
+        'match-1',
+        'C:\\demo.dem',
+        GameType.Classic,
+        0,
+        GameMode.Competitive,
+        1,
+        10,
+        10,
+        10,
+        10,
+        'Team A',
+        TeamNumber.CT,
+        '2026-04-04T15:39:56.000Z',
+        0,
+        24,
+        0,
+      );
 
-    sqliteDatabase.prepare(`
+    sqliteDatabase
+      .prepare(`
       INSERT INTO rounds (
         id,
         match_checksum,
@@ -468,61 +530,53 @@ describe('search database queries', () => {
         winner_side,
         overtime_number
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      1,
-      'match-1',
-      1,
-      10,
-      10,
-      20,
-      20,
-      100,
-      100,
-      110,
-      110,
-      'Team A',
-      'Team B',
-      1,
-      0,
-      TeamNumber.T,
-      TeamNumber.CT,
-      800,
-      800,
-      1000,
-      1000,
-      500,
-      500,
-      EconomyType.Full,
-      EconomyType.Full,
-      90,
-      RoundEndReason.TargetBombed,
-      'Team A',
-      TeamNumber.CT,
-      0,
-    );
+    `)
+      .run(
+        1,
+        'match-1',
+        1,
+        10,
+        10,
+        20,
+        20,
+        100,
+        100,
+        110,
+        110,
+        'Team A',
+        'Team B',
+        1,
+        0,
+        TeamNumber.T,
+        TeamNumber.CT,
+        800,
+        800,
+        1000,
+        1000,
+        500,
+        500,
+        EconomyType.Full,
+        EconomyType.Full,
+        90,
+        RoundEndReason.TargetBombed,
+        'Team A',
+        TeamNumber.CT,
+        0,
+      );
 
-    sqliteDatabase.prepare(`INSERT INTO round_comments (match_checksum, number, comment) VALUES (?, ?, ?)`).run(
-      'match-1',
-      1,
-      'important round',
-    );
-    sqliteDatabase.prepare(`INSERT INTO round_tags (checksum, round_number, tag_id) VALUES (?, ?, ?)`).run(
-      'match-1',
-      1,
-      'tag-1',
-    );
-    sqliteDatabase.prepare(`INSERT INTO round_tags (checksum, round_number, tag_id) VALUES (?, ?, ?)`).run(
-      'match-1',
-      1,
-      'tag-2',
-    );
+    sqliteDatabase
+      .prepare(`INSERT INTO round_comments (match_checksum, number, comment) VALUES (?, ?, ?)`)
+      .run('match-1', 1, 'important round');
+    sqliteDatabase
+      .prepare(`INSERT INTO round_tags (checksum, round_number, tag_id) VALUES (?, ?, ?)`)
+      .run('match-1', 1, 'tag-1');
+    sqliteDatabase
+      .prepare(`INSERT INTO round_tags (checksum, round_number, tag_id) VALUES (?, ?, ?)`)
+      .run('match-1', 1, 'tag-2');
     sqliteDatabase.prepare(`INSERT INTO checksum_tags (checksum, tag_id) VALUES (?, ?)`).run('match-1', 'match-tag-1');
-    sqliteDatabase.prepare(`INSERT INTO players (steam_id, name, match_checksum, team_name) VALUES (?, ?, ?, ?)`).run(
-      'steam-1',
-      'Alpha',
-      'match-1',
-      'Team A',
-    );
+    sqliteDatabase
+      .prepare(`INSERT INTO players (steam_id, name, match_checksum, team_name) VALUES (?, ?, ?, ?)`)
+      .run('steam-1', 'Alpha', 'match-1', 'Team A');
 
     const rounds = await searchRounds({
       steamIds: ['steam-1'],
@@ -552,7 +606,8 @@ describe('search database queries', () => {
   it('should group collateral kills by tick and keep SQLite boolean filters working', async () => {
     const sqliteDatabase = getSqliteDatabase();
 
-    sqliteDatabase.prepare(`
+    sqliteDatabase
+      .prepare(`
       INSERT INTO demos (
         checksum,
         name,
@@ -571,26 +626,28 @@ describe('search database queries', () => {
         map_name,
         share_code
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      'match-kills',
-      'kills.dem',
-      Game.CS2,
-      DemoSource.Valve,
-      DemoType.GOTV,
-      '2026-04-04T15:39:56.000Z',
-      1,
-      1,
-      'server',
-      'client',
-      1000,
-      64,
-      64,
-      120,
-      'de_dust2',
-      null,
-    );
+    `)
+      .run(
+        'match-kills',
+        'kills.dem',
+        Game.CS2,
+        DemoSource.Valve,
+        DemoType.GOTV,
+        '2026-04-04T15:39:56.000Z',
+        1,
+        1,
+        'server',
+        'client',
+        1000,
+        64,
+        64,
+        120,
+        'de_dust2',
+        null,
+      );
 
-    sqliteDatabase.prepare(`
+    sqliteDatabase
+      .prepare(`
       INSERT INTO matches (
         checksum,
         demo_path,
@@ -609,30 +666,29 @@ describe('search database queries', () => {
         max_rounds,
         has_vac_live_ban
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      'match-kills',
-      'C:\\kills.dem',
-      GameType.Classic,
-      0,
-      GameMode.Competitive,
-      1,
-      3,
-      3,
-      0,
-      10,
-      'Team A',
-      TeamNumber.CT,
-      '2026-04-04T15:39:56.000Z',
-      0,
-      24,
-      0,
-    );
+    `)
+      .run(
+        'match-kills',
+        'C:\\kills.dem',
+        GameType.Classic,
+        0,
+        GameMode.Competitive,
+        1,
+        3,
+        3,
+        0,
+        10,
+        'Team A',
+        TeamNumber.CT,
+        '2026-04-04T15:39:56.000Z',
+        0,
+        24,
+        0,
+      );
 
-    sqliteDatabase.prepare(`INSERT INTO round_comments (match_checksum, number, comment) VALUES (?, ?, ?)`).run(
-      'match-kills',
-      1,
-      'collateral round',
-    );
+    sqliteDatabase
+      .prepare(`INSERT INTO round_comments (match_checksum, number, comment) VALUES (?, ?, ?)`)
+      .run('match-kills', 1, 'collateral round');
 
     const insertKill = sqliteDatabase.prepare(`
       INSERT INTO kills (
@@ -861,7 +917,8 @@ describe('search database queries', () => {
   it('should only return won clutches for the requested opponent count', async () => {
     const sqliteDatabase = getSqliteDatabase();
 
-    sqliteDatabase.prepare(`
+    sqliteDatabase
+      .prepare(`
       INSERT INTO demos (
         checksum,
         name,
@@ -880,26 +937,28 @@ describe('search database queries', () => {
         map_name,
         share_code
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      'match-clutches',
-      'clutches.dem',
-      Game.CS2,
-      DemoSource.Valve,
-      DemoType.GOTV,
-      '2026-04-05T15:39:56.000Z',
-      1,
-      1,
-      'server',
-      'client',
-      1000,
-      64,
-      64,
-      120,
-      'de_inferno',
-      null,
-    );
+    `)
+      .run(
+        'match-clutches',
+        'clutches.dem',
+        Game.CS2,
+        DemoSource.Valve,
+        DemoType.GOTV,
+        '2026-04-05T15:39:56.000Z',
+        1,
+        1,
+        'server',
+        'client',
+        1000,
+        64,
+        64,
+        120,
+        'de_inferno',
+        null,
+      );
 
-    sqliteDatabase.prepare(`
+    sqliteDatabase
+      .prepare(`
       INSERT INTO matches (
         checksum,
         demo_path,
@@ -918,30 +977,29 @@ describe('search database queries', () => {
         max_rounds,
         has_vac_live_ban
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      'match-clutches',
-      'C:\\clutches.dem',
-      GameType.Classic,
-      0,
-      GameMode.Competitive,
-      1,
-      10,
-      10,
-      2,
-      20,
-      'Team A',
-      TeamNumber.CT,
-      '2026-04-05T15:39:56.000Z',
-      0,
-      24,
-      0,
-    );
+    `)
+      .run(
+        'match-clutches',
+        'C:\\clutches.dem',
+        GameType.Classic,
+        0,
+        GameMode.Competitive,
+        1,
+        10,
+        10,
+        2,
+        20,
+        'Team A',
+        TeamNumber.CT,
+        '2026-04-05T15:39:56.000Z',
+        0,
+        24,
+        0,
+      );
 
-    sqliteDatabase.prepare(`INSERT INTO round_comments (match_checksum, number, comment) VALUES (?, ?, ?)`).run(
-      'match-clutches',
-      8,
-      'won clutch',
-    );
+    sqliteDatabase
+      .prepare(`INSERT INTO round_comments (match_checksum, number, comment) VALUES (?, ?, ?)`)
+      .run('match-clutches', 8, 'won clutch');
 
     const insertClutch = sqliteDatabase.prepare(`
       INSERT INTO clutches (
@@ -998,7 +1056,8 @@ describe('search database queries', () => {
   it('should aggregate multi-kills by round and preserve all kills in the result', async () => {
     const sqliteDatabase = getSqliteDatabase();
 
-    sqliteDatabase.prepare(`
+    sqliteDatabase
+      .prepare(`
       INSERT INTO demos (
         checksum,
         name,
@@ -1017,26 +1076,28 @@ describe('search database queries', () => {
         map_name,
         share_code
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      'match-multi',
-      'multi.dem',
-      Game.CS2,
-      DemoSource.Valve,
-      DemoType.GOTV,
-      '2026-04-06T15:39:56.000Z',
-      1,
-      1,
-      'server',
-      'client',
-      1000,
-      64,
-      64,
-      120,
-      'de_nuke',
-      null,
-    );
+    `)
+      .run(
+        'match-multi',
+        'multi.dem',
+        Game.CS2,
+        DemoSource.Valve,
+        DemoType.GOTV,
+        '2026-04-06T15:39:56.000Z',
+        1,
+        1,
+        'server',
+        'client',
+        1000,
+        64,
+        64,
+        120,
+        'de_nuke',
+        null,
+      );
 
-    sqliteDatabase.prepare(`
+    sqliteDatabase
+      .prepare(`
       INSERT INTO matches (
         checksum,
         demo_path,
@@ -1055,30 +1116,29 @@ describe('search database queries', () => {
         max_rounds,
         has_vac_live_ban
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      'match-multi',
-      'C:\\multi.dem',
-      GameType.Classic,
-      0,
-      GameMode.Competitive,
-      1,
-      5,
-      5,
-      1,
-      20,
-      'Team A',
-      TeamNumber.CT,
-      '2026-04-06T15:39:56.000Z',
-      0,
-      24,
-      0,
-    );
+    `)
+      .run(
+        'match-multi',
+        'C:\\multi.dem',
+        GameType.Classic,
+        0,
+        GameMode.Competitive,
+        1,
+        5,
+        5,
+        1,
+        20,
+        'Team A',
+        TeamNumber.CT,
+        '2026-04-06T15:39:56.000Z',
+        0,
+        24,
+        0,
+      );
 
-    sqliteDatabase.prepare(`INSERT INTO round_comments (match_checksum, number, comment) VALUES (?, ?, ?)`).run(
-      'match-multi',
-      3,
-      'double kill round',
-    );
+    sqliteDatabase
+      .prepare(`INSERT INTO round_comments (match_checksum, number, comment) VALUES (?, ?, ?)`)
+      .run('match-multi', 3, 'double kill round');
 
     const insertKill = sqliteDatabase.prepare(`
       INSERT INTO kills (
