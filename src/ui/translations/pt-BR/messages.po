@@ -6873,6 +6873,11 @@ msgid "Search"
 msgstr "Buscar"
 
 #: src/ui/settings/about/about.tsx
+#: src/ui/title-bar/title-bar.tsx
+msgid "CS Demo Manager Lite"
+msgstr ""
+
+#: src/ui/settings/about/about.tsx
 msgid "Automatically download updates."
 msgstr "Baixar atualizações automaticamente."
 
